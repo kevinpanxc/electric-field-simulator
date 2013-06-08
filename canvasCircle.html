@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="canvasCircle.css"/>
+	<script type="text/javascript" src="jquery-1.8.3.js"></script>
+	<script type="text/javascript" src="chargeObject.js"></script>
+	<script type="text/javascript" src="canvasCircle.js"></script>
+	<script type="text/javascript" src="slidingButtons.js"></script>
+	<link href="http://fonts.googleapis.com/css?family=Open+Sans|Lato" rel="stylesheet" type="text/css">
+</head>
+	
+<body onload="init()">
+	<div id = "header">Electric Field Vectors (incomplete)</div>
+	<div id = "canvasContainer">
+		<div id="toolsContainer">
+			<div id = "pointCharge" class= "toolInnerContainer">
+				<div id="addPositive" onclick="addPosParticle()" title="Add Positive Charge"></div>
+				<div id="addNegative" onclick="addNegParticle()" title="Add Negative Charge"></div>
+				<div class="pcExpContainer">
+					<span class="promptStyle">STRENGTH: </span>
+					<input type="text" class="textContainer" id="strengthText">
+				</div>
+				<div class="pcExpContainer">
+					<span class="promptStyle">X POSITION: </span>
+					<input type="text" class="textContainer" id="xPosText">
+				</div>
+				<div class="pcExpContainer">			
+					<span class="promptStyle">Y POSITION: </span>
+					<input type="text" class="textContainer" id="yPosText">
+				</div>
+				<button class="expandable" id="pointChargeExp">options</button>
+			</div>
+			<div class = "toolInnerContainer">
+				<div id="probeButton" onclick="probe()" title="Test Electric Field Strength"></div>
+				<div class="probeInfoContainer">
+					<div id="probeMagnitude" class = "promptStyle"></div>
+					<div id="probeAngle" class = "promptStyle"></div>
+				</div>
+				<div id="probeXPos" class = "probeExpContainer">
+					<span class="promptStyle">X POSITION: </span>
+					<input type="text" class="textContainer" id="probeXText">
+				</div>
+				<div id="probeYPos" class = "probeExpContainer">
+					<span class="promptStyle">Y POSITION: </span>
+					<input type="text" class="textContainer" id="probeYText">
+				</div>
+				<button class="expandable" id="probeExp">options</button>
+			</div>
+			<div class = "toolInnerContainer">
+				<div class = "scaleContainer">
+					<span class="promptStyle">SCALE: </span>
+					<input type="text" class="textContainer" id="scaleText">
+					<span class="promptStyle">m </span>
+				</div>
+				<button class="expandable" onclick="updateScale()">update</button>
+			</div>
+		</div>
+		<div id = "chargeList">
+			<div id="titleChargeList">ELEMENTS LIST</div>
+			<img src="images/blueThickLine.png" id="chargeListBlueLine"/>
+		</div>
+		<canvas id="canvas" width="600" height="600"></canvas>
+	</div>
+<!-- 	<button onclick="drawVectorField()">Draw Field</button>
+	<button onclick="unlock()">Unlock</button> -->
+</body>
+
+</html>
