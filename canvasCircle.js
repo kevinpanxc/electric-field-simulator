@@ -182,9 +182,6 @@ function mouseDown(e){
 
 function cursorOverCircle(x, y)
 {
-    // check.innerHTML = "Cursor[" + x + ", " + y + "], CanvasOffset["
-    //     + (x - canvas.offsetLeft) + ", " + (y - canvas.offsetTop) + "], one["
-    //     + px + ", " + py + "]";
 
     for (var i = chargeArray.length - 1; i >= 0; i--){
     	if ((x - canvas.offsetLeft) > (chargeArray[i].xPos - oneRadius)  &&  (x - canvas.offsetLeft) < (chargeArray[i].xPos + oneRadius)
@@ -222,8 +219,16 @@ function addPosParticle()
 	chargeArray.push(newCharge);
 	currentIndex = chargeArray.length - 1;
 	updateChargeList();
-	document.getElementById("li" + selectedId).className = "liClassHover";
-	document.getElementById("li" + chargeId).className = "liClassNoHover";
+	document.getElementById("li" + chargeId).className = "liClassShade";
+	if (chargeArray.length == 1) {
+		canvas.onmouseup = mouseUp;
+	    canvas.onmousedown = mouseDown;
+	    canvas.onmousemove = mouseMoved;
+		intervalID = setInterval(reDraw, 32);
+	}
+	else {
+		document.getElementById("li" + selectedId).className = "liClassNoShade";
+	}
 	selectedId = chargeId;
 	highestID = chargeId;
 	chargeId++;
@@ -254,8 +259,16 @@ function addNegParticle()
 	chargeArray.push(newCharge);
 	currentIndex = chargeArray.length - 1;
 	updateChargeList();
-	document.getElementById("li" + selectedId).className = "liClassHover";
-	document.getElementById("li" + chargeId).className = "liClassNoHover";
+	document.getElementById("li" + chargeId).className = "liClassShade";
+	if (chargeArray.length == 1) {
+		canvas.onmouseup = mouseUp;
+	    canvas.onmousedown = mouseDown;
+	    canvas.onmousemove = mouseMoved;
+		intervalID = setInterval(reDraw, 32);
+	}
+	else {
+		document.getElementById("li" + selectedId).className = "liClassNoShade";
+	}
 	selectedId = chargeId;
 	highestID = chargeId;
 	chargeId++;
@@ -282,7 +295,7 @@ function updateChargeList () {
 	else colorCodeElement.src = "images/negChargeColorCode.png";
 	rightBlock.className = "liMainDiv";
 	colorCodeElement.id = "colorCodeBar" + chargeObject.id;
-	listElement.className = "liClassHover";
+	listElement.className = "liClassNoShade";
 	listElement.id = "li" + chargeObject.id;
 	textElement.className = "textElement";
 	expandButton.src = "images/expandPanel.png";
@@ -364,8 +377,8 @@ function currentIndexSelect(id, arrayIndexParameter) {
 	chargeArray[arrayIndex] = chargeArray[chargeArray.length - 1];
 	chargeArray[chargeArray.length - 1] = newCharge;
 	currentIndex = chargeArray.length - 1;
-	document.getElementById("li" + selectedId).className = "liClassHover";
-	document.getElementById("li" + id).className = "liClassNoHover";
+	document.getElementById("li" + selectedId).className = "liClassNoShade";
+	document.getElementById("li" + id).className = "liClassShade";
 	selectedId = id;
 }
 
@@ -651,8 +664,8 @@ function optionsButtonListClick(id) {
 	optionsBottomContainer.appendChild(optionsUpdateButton);
 	optionsBottomContainer.appendChild(optionsDeleteButton);
 
-	fullScreenDiv.setAttribute("onClick", "closeOptionsPopUp()");
-	crossImage.setAttribute("onClick", "closeOptionsPopUp()");
+	fullScreenDiv.setAttribute("onClick", "closeOptionsPopUp(true)");
+	crossImage.setAttribute("onClick", "closeOptionsPopUp(true)");
 	polarityDivPic.setAttribute("onClick", "changeChargePolarity()");
 	optionsUpdateButton.setAttribute("onClick", "updateCharge("+ id +")");
 	optionsDeleteButton.setAttribute("onClick", "deleteCharge("+ id +")");
@@ -668,6 +681,9 @@ function optionsButtonListClick(id) {
 
 	defaultTextBoxBorderColor = document.getElementById("optionsXPOS").style.borderColor;
 
+	canvas.onmouseup = null;
+    canvas.onmousedown = null;
+    canvas.onmousemove = null;
 	clearInterval(intervalID);
 }
 
@@ -679,12 +695,23 @@ function createNewElement (type, id, className, text){
 	return temp;
 }
 
-function closeOptionsPopUp () {
+function closeOptionsPopUp (continueDrawing) {
 	var canvasContainer = document.getElementById("canvasContainer");
 	canvasContainer.removeChild(document.getElementById("fullScreenDiv"));
 	canvasContainer.removeChild(document.getElementById("popUp"));
 
-	intervalID = setInterval(reDraw, 32);
+	if (continueDrawing) {
+	    canvas.onmouseup = mouseUp;
+	    canvas.onmousedown = mouseDown;
+	    canvas.onmousemove = mouseMoved;
+		intervalID = setInterval(reDraw, 32);
+	}
+	else {
+		canvas.onmouseup = null;
+	    canvas.onmousedown = null;
+	    canvas.onmousemove = null;
+		clearInterval(intervalID);
+	}
 }
 
 function findArrayIndexFromID (id) {
@@ -734,7 +761,7 @@ function updateCharge (id) {
 		if (polarity > 0) document.getElementById("colorCodeBar" + id).src = "images/posChargeColorCode.png";
 		else document.getElementById("colorCodeBar" + id).src = "images/negChargeColorCode.png";
 
-		closeOptionsPopUp();
+		closeOptionsPopUp(true);
 	}
 }
 
@@ -744,15 +771,33 @@ function deleteCharge (id) {
 	var chargeList = document.getElementById("chargeList");
 	var listElementDelete = document.getElementById("li" + id);
 
-	if (id != highestID) selectedId = higherAvailableID(id);
-	else selectedId = lowerAvailableID(id);
-	currentIndexSelect(selectedId, -1);
+	if (chargeArray.length == 0){
+		chargeList.removeChild(listElementDelete);
+		canvas.width = canvas.width;
+		closeOptionsPopUp(false);
+	}
+	else {
+		if (id != highestID) selectedId = higherAvailableID(id);
+		else {
+			selectedId = lowerAvailableID(id);
+			highestID = selectedId;
+		}
+		currentIndexSelect(selectedId, -1);
 
-	if (highestID == id) highestID -= 1;
+		// if (highestID == id) highestID -= 1;
 
-	chargeList.removeChild(listElementDelete);
+		// var testString = "";
+		// for (var i = 0; i < chargeArray.length; i++) {
+		// 	testString += chargeArray[i].id;
+		// 	testString += ", ";
+		// }
+		// alert(testString);
+		// alert("Highest ID: " + highestID);
 
-	closeOptionsPopUp();
+		chargeList.removeChild(listElementDelete);
+
+		closeOptionsPopUp(true);
+	}
 
 	// when no elements in chargeArray -> functions to deal with
 	// changed draw

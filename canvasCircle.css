@@ -186,16 +186,16 @@
 	text-align: left;
 }
 
-.liClassHover {
+.liClassNoShade {
 	margin-bottom: 2px;
 	background-color: #EAEAEA;
 }
 
-.liClassHover:hover {
+.liClassNoShade:hover {
 	background-color: #E0E0E0;
 }
 
-.liClassNoHover {
+.liClassShade {
 	margin-bottom: 2px;
 	background-color: #E0E0E0;
 }
