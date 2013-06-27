@@ -15,26 +15,28 @@
 	<div id = "header">Electric Field Vectors (incomplete)</div>
 	<div id = "canvasContainer">
 		<div id="toolsContainer">
+			<div class = "toolInnerContainerLabel">Point Charge</div>
 			<div id = "pointCharge" class= "toolInnerContainer">
-				<div id="addPositive" onclick="addPosParticle()" title="Add Positive Charge"></div>
-				<div id="addNegative" onclick="addNegParticle()" title="Add Negative Charge"></div>
-				<div class="pcExpContainer">
+				<div id="addPositive" onclick="addPosPointCharge()" title="Add Positive Point Charge"></div>
+				<div id="addNegative" onclick="addNegPointCharge()" title="Add Negative Point Charge"></div>
+				<div class="expContainer">
 					<span class="promptStyle">STRENGTH: </span>
 					<input type="text" class="textContainer" id="strengthText">
 				</div>
-				<div class="pcExpContainer">
+				<div class="expContainer">
 					<span class="promptStyle">X POSITION: </span>
 					<input type="text" class="textContainer" id="xPosText">
 				</div>
-				<div class="pcExpContainer">			
+				<div class="expContainer">			
 					<span class="promptStyle">Y POSITION: </span>
 					<input type="text" class="textContainer" id="yPosText">
 				</div>
-				<button class="expandable" id="pointChargeExp">options</button>
+				<button class="expandable">options</button>
 			</div>
+			<div class = "toolInnerContainerLabel">Line Charge</div>
 			<div class = "toolInnerContainer">
-				<button>plc</button>
-				<button>nlc</button>
+				<div id="addPositive" onclick="addLine()" title="Add Positive Line Charge"></div>
+				<div id="addNegative" onclick="addNegParticle()" title="Add Negative Line Charge"></div>
 				<button class="expandable" id="pointChargeExp">options</button>
 			</div>
 			<div class = "toolInnerContainer">
@@ -43,24 +45,24 @@
 					<div id="probeMagnitude" class = "promptStyle"></div>
 					<div id="probeAngle" class = "promptStyle"></div>
 				</div>
-				<div id="probeXPos" class = "probeExpContainer">
+				<div id="probeXPos" class = "expContainer">
 					<span class="promptStyle">X POSITION: </span>
 					<input type="text" class="textContainer" id="probeXText">
 				</div>
-				<div id="probeYPos" class = "probeExpContainer">
+				<div id="probeYPos" class = "expContainer">
 					<span class="promptStyle">Y POSITION: </span>
 					<input type="text" class="textContainer" id="probeYText">
 				</div>
-				<button class="expandable" id="probeExp">options</button>
+				<button class="expandable">options</button>
 			</div>
-			<div class = "toolInnerContainer">
+<!-- 			<div class = "toolInnerContainer">
 				<div class = "scaleContainer">
 					<span class="promptStyle">SCALE: </span>
 					<input type="text" class="textContainer" id="scaleText">
 					<span class="promptStyle">m </span>
 				</div>
 				<button class="expandable" onclick="updateScale()">update</button>
-			</div>
+			</div> -->
 		</div>
 		<div id = "chargeList">
 			<div id="titleChargeList">ELEMENTS LIST</div>

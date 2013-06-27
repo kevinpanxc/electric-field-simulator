@@ -1,10 +1,10 @@
 $(function() {     
-    $(".pcExpContainer").hide();
+    $(".expContainer").hide();
      
-    $("#pointChargeExp").toggle(function() {         
-        $(this).prevAll(".pcExpContainer").slideDown();         
+    $(".expandable").toggle(function() {         
+        $(this).prevAll(".expContainer").slideDown();         
     }, function() {                      
-        $(this).prevAll(".pcExpContainer").slideUp();        
+        $(this).prevAll(".expContainer").slideUp();        
     }); 
 });
 

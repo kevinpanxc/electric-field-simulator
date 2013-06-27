@@ -3,6 +3,7 @@ var ctx;
 var check;
 var radgrad;
 var intervalID;
+var intervalTime = 32;
 
 var isMouseDown = false;
 var currentIndex = 0;
@@ -17,7 +18,7 @@ var oneRadius = 15;
 // Pushing first charge
 var chargeId = 0;
 var selectedId = 0;
-var newCharge = new chargeElement (100, 100, 1, 1, chargeId);
+var newCharge = new chargeElement().initPointCharge(100, 100, 1, 1, chargeId);
 var chargeArray = [];
 chargeArray.push(newCharge);
 chargeId++;
@@ -73,7 +74,7 @@ function init(){
     updateChargeList();
     currentIndexSelect(selectedId, -1);
 
-    intervalID = setInterval(reDraw, 32); // repaint the canvas at intervals
+    reDraw();
 }
 
 function reDraw() {
@@ -134,8 +135,8 @@ function mouseMoved(e){
 			}
 			if (chargeArray[i].polarity == -1) sProbe = sProbe + Math.PI;
 			if (sProbe > 2 * Math.PI) sProbe = sProbe - 2 * Math.PI;
-			xResult += (Math.cos(sProbe) * chargeArray[i].chargeStrength/dProbe);
-			yResult += (Math.sin(sProbe) * chargeArray[i].chargeStrength/dProbe);
+			xResult += (Math.cos(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
+			yResult += (Math.sin(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
     	}
     	yResult = -yResult;
     	if (xResult > -0.01 && xResult < 0.01) {
@@ -163,10 +164,12 @@ function mouseMoved(e){
 function mouseUp()
 {
     isMouseDown = false;
+    clearInterval(intervalID);
 }
 
 function mouseDown(e){
 	e.preventDefault();
+	intervalID = setInterval(reDraw, intervalTime);
 	var check = cursorOverCircle(e.pageX, e.pageY);
 	if (check >= 0){
 		// var newCharge = chargeArray[check];
@@ -194,7 +197,7 @@ function cursorOverCircle(x, y)
     return -1;
 }
 
-function addPosParticle()
+function addPosPointCharge()
 {
 	var inputStrength = document.getElementById("strengthText");
 	var xPosition = document.getElementById("xPosText");
@@ -215,7 +218,7 @@ function addPosParticle()
 	}
 	else if (isNaN(xPos) || isNaN(yPos)) return;
 	else if (xPos < 0 || yPos < 0) return;
-	var newCharge = new chargeElement (xPos, yPos, polarity, strength, chargeId);
+	var newCharge = new chargeElement().initPointCharge(xPos, yPos, polarity, strength, chargeId);
 	chargeArray.push(newCharge);
 	currentIndex = chargeArray.length - 1;
 	updateChargeList();
@@ -224,7 +227,7 @@ function addPosParticle()
 		canvas.onmouseup = mouseUp;
 	    canvas.onmousedown = mouseDown;
 	    canvas.onmousemove = mouseMoved;
-		intervalID = setInterval(reDraw, 32);
+		reDraw();
 	}
 	else {
 		document.getElementById("li" + selectedId).className = "liClassNoShade";
@@ -232,9 +235,11 @@ function addPosParticle()
 	selectedId = chargeId;
 	highestID = chargeId;
 	chargeId++;
+
+	reDraw();
 }
 
-function addNegParticle()
+function addNegPointCharge()
 {
 	var inputStrength = document.getElementById("strengthText");
 	var xPosition = document.getElementById("xPosText");
@@ -255,7 +260,7 @@ function addNegParticle()
 	}
 	else if (isNaN(xPos) || isNaN(yPos)) return;
 	else if (xPos < 0 || yPos < 0) return;
-	var newCharge = new chargeElement (xPos, yPos, polarity, strength, chargeId);
+	var newCharge = new chargeElement().initPointCharge(xPos, yPos, polarity, strength, chargeId);
 	chargeArray.push(newCharge);
 	currentIndex = chargeArray.length - 1;
 	updateChargeList();
@@ -264,7 +269,7 @@ function addNegParticle()
 		canvas.onmouseup = mouseUp;
 	    canvas.onmousedown = mouseDown;
 	    canvas.onmousemove = mouseMoved;
-		intervalID = setInterval(reDraw, 32);
+		reDraw();
 	}
 	else {
 		document.getElementById("li" + selectedId).className = "liClassNoShade";
@@ -272,6 +277,21 @@ function addNegParticle()
 	selectedId = chargeId;
 	highestID = chargeId;
 	chargeId++;
+
+	reDraw();
+}
+
+function addPosLineCharge() {
+	ctx.beginPath();
+	ctx.strokeStyle = "#000000";
+	ctx.lineWidth = 18;
+	ctx.moveTo(50, 200);
+	ctx.lineTo(400, 200);
+	ctx.lineCap = "round";
+	ctx.stroke();
+	ctx.lineWidth = 1;
+	ctx.lineCap = "butt";
+	clearInterval(intervalID);
 }
 
 function updateChargeList () {
@@ -340,8 +360,8 @@ function updateChargeList () {
 	rightBlock.appendChild(optionsButton);
 	rightBlock.appendChild(expandButton);
 	
-	if (chargeObject.polarity == 1) textElement.innerHTML += chargeObject.chargeStrength +" C </br>";
-	else textElement.innerHTML += "-" + chargeObject.chargeStrength +" C </br>";
+	if (chargeObject.polarity == 1) textElement.innerHTML += chargeObject.pointChargeStrength +" C </br>";
+	else textElement.innerHTML += "-" + chargeObject.pointChargeStrength +" C </br>";
 	textElement.innerHTML += "Point Charge </br>";
 	xPosContainer.appendChild(xPosContainerText);
 	xPosContainer.appendChild(xPosContainerInput);
@@ -435,8 +455,8 @@ function strengthAngleSet(xProbe, yProbe) {
 			}
 			if (chargeArray[i].polarity == -1) sProbe = sProbe + Math.PI;
 			if (sProbe > 2 * Math.PI) sProbe = sProbe - 2 * Math.PI;
-			xResult += (Math.cos(sProbe) * chargeArray[i].chargeStrength/dProbe);
-			yResult += (Math.sin(sProbe) * chargeArray[i].chargeStrength/dProbe);
+			xResult += (Math.cos(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
+			yResult += (Math.sin(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
     	}
     	yResult = -yResult;
     	if (xResult > -0.01 && xResult < 0.01) {
@@ -452,18 +472,6 @@ function strengthAngleSet(xProbe, yProbe) {
     	if (sProbe > 2 * Math.PI) sProbe = sProbe - 2 * Math.PI;
     	probeMagnitude.innerHTML = "STRENGTH: " + parseFloat(Math.sqrt(xResult * xResult + yResult * yResult)).toFixed(3);
     	probeAngle.innerHTML = "ANGLE: " + parseFloat(sProbe).toFixed(3);
-}
-
-function addLine() {
-	ctx.beginPath();
-	ctx.strokeStyle = "#000000";
-	ctx.lineWidth = 20;
-	ctx.moveTo(50, 200);
-	ctx.lineTo(400, 200);
-	ctx.lineCap = "round";
-	ctx.stroke();
-	ctx.lineWidth = 1;
-	ctx.lineCap = "butt";
 }
 
 function changedDraw() {
@@ -527,8 +535,8 @@ function changedDraw() {
 				}
 				if (chargeArray[j].polarity == -1) s = s + Math.PI;
 				if (s > 2 * Math.PI) s = s - 2 * Math.PI;
-				x1 += (Math.cos(s) * chargeArray[j].chargeStrength/d);
-				y1 += (Math.sin(s) * chargeArray[j].chargeStrength/d);
+				x1 += (Math.cos(s) * chargeArray[j].pointChargeStrength/d);
+				y1 += (Math.sin(s) * chargeArray[j].pointChargeStrength/d);
 			}
 			if (check != 1){
 	 	    	if (x1 < 0.01 && x1 > -0.01){
@@ -565,11 +573,6 @@ function slopeToRad (slope){
 	var slopeRad;
 	slopeRad = Math.atan(slope);
 	return slopeRad;
-}
-
-function unlock() {
-	canvas.onmousedown = mouseDown;
-    intervalID = setInterval(reDraw, 10); // repaint the canvas at intervals
 }
 
 function updateScale() {
@@ -704,7 +707,7 @@ function closeOptionsPopUp (continueDrawing) {
 	    canvas.onmouseup = mouseUp;
 	    canvas.onmousedown = mouseDown;
 	    canvas.onmousemove = mouseMoved;
-		intervalID = setInterval(reDraw, 32);
+	    reDraw();
 	}
 	else {
 		canvas.onmouseup = null;
@@ -762,6 +765,8 @@ function updateCharge (id) {
 		else document.getElementById("colorCodeBar" + id).src = "images/negChargeColorCode.png";
 
 		closeOptionsPopUp(true);
+
+		reDraw();
 	}
 }
 

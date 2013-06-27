@@ -158,3 +158,8 @@ function deleteCharge (id) {
 	// mouse moved (probe)
 	// cursor over circle
 }
+
+function unlock() {
+	canvas.onmousedown = mouseDown;
+    intervalID = setInterval(reDraw, 10); // repaint the canvas at intervals
+}
