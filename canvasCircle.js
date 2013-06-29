@@ -172,10 +172,6 @@ function mouseDown(e){
 	intervalID = setInterval(reDraw, intervalTime);
 	var check = cursorOverCircle(e.pageX, e.pageY);
 	if (check >= 0){
-		// var newCharge = chargeArray[check];
-		// chargeArray[check] = chargeArray[chargeArray.length - 1];
-		// chargeArray[chargeArray.length - 1] = newCharge;
-		// currentIndex = chargeArray.length - 1;
 		currentIndexSelect(chargeArray[check].id, check);
         cursorX = (e.pageX - canvas.offsetLeft) - chargeArray[currentIndex].xPos;
         cursorY = (e.pageY - canvas.offsetTop) - chargeArray[currentIndex].yPos;
@@ -282,16 +278,23 @@ function addNegPointCharge()
 }
 
 function addPosLineCharge() {
-	ctx.beginPath();
-	ctx.strokeStyle = "#000000";
-	ctx.lineWidth = 18;
-	ctx.moveTo(50, 200);
-	ctx.lineTo(400, 200);
-	ctx.lineCap = "round";
-	ctx.stroke();
-	ctx.lineWidth = 1;
-	ctx.lineCap = "butt";
-	clearInterval(intervalID);
+	var sXPos = 50;
+	var sYPos = 50;
+	var eXPos = 100;
+	var eYPos = 100;
+	var polarity = 1;
+
+	var newCharge = new chargeElement().initLineChargeByStartEnd(sXPos, sYPos, eXPos, eYPos, 1, 0, 0);
+
+	if ((eXPos - sXPos) > 0) newCharge.centerX = Math.floor((newCharge.eXPos - newCharge.sXPos)/2) + newCharge.sXPos;
+	else newCharge.centerX = Math.floor((newCharge.sXPos - newCharge.eXPos)/2) + newCharge.eXPos;
+
+	if ((eYPos - sYPos) > 0) newCharge.centerY = Math.floor((newCharge.eYPos - newCharge.sYPos)/2) + newCharge.sYPos;
+	else newCharge.centerY = Math.floor((newCharge.sYPos - newCharge.eYPos)/2) + newCharge.eYPos;
+
+	chargeArray.push(newCharge);
+
+	reDraw();
 }
 
 function updateChargeList () {
@@ -479,21 +482,40 @@ function changedDraw() {
 	var y = 25;
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 0; i < chargeArray.length; i++){
-		radgrad = ctx.createRadialGradient(chargeArray[i].xPos,chargeArray[i].yPos,5,chargeArray[i].xPos,chargeArray[i].yPos,15);
-		if(chargeArray[i].polarity == 1){
-			radgrad.addColorStop(0, 'rgba(0,0,0,1)');
-			radgrad.addColorStop(0.8, 'rgba(200,200,200,.9)');
-			radgrad.addColorStop(1, 'rgba(255,255,255,0)');
+		if (chargeArray[i].pointOrLine == 1){
+			radgrad = ctx.createRadialGradient(chargeArray[i].xPos,chargeArray[i].yPos,5,chargeArray[i].xPos,chargeArray[i].yPos,15);
+			if(chargeArray[i].polarity == 1){
+				radgrad.addColorStop(0, 'rgba(0,0,0,1)');
+				radgrad.addColorStop(0.8, 'rgba(200,200,200,.9)');
+				radgrad.addColorStop(1, 'rgba(255,255,255,0)');
+			}
+			else {
+				radgrad.addColorStop(0, 'rgba(255,36,36,1)');
+				radgrad.addColorStop(0.8, 'rgba(255,125,125,.5)');
+				radgrad.addColorStop(1, 'rgba(255,255,255,0)');
+			}
+			ctx.fillStyle = radgrad;
+			ctx.beginPath();
+			ctx.arc(chargeArray[i].xPos, chargeArray[i].yPos, oneRadius, 0, Math.PI*2, true);
+			ctx.fill();
 		}
 		else {
-			radgrad.addColorStop(0, 'rgba(255,36,36,1)');
-			radgrad.addColorStop(0.8, 'rgba(255,125,125,.5)');
-			radgrad.addColorStop(1, 'rgba(255,255,255,0)');
+			var charge = chargeArray[i];
+			ctx.beginPath();
+			ctx.strokeStyle = "#000000";
+			ctx.lineWidth = oneRadius;
+			ctx.moveTo(charge.sXPos, charge.sYPos);
+			ctx.lineTo(charge.eXPos, charge.eYPos);
+			ctx.lineCap = "round";
+			ctx.stroke();
+			ctx.lineWidth = 1;
+			ctx.lineCap = "butt";
+
+			ctx.fillStyle = "#6EA6F5";
+			ctx.beginPath();
+			ctx.arc(charge.centerX, charge.centerY, 6, 0, Math.PI*2, true);
+			ctx.fill();
 		}
-		ctx.fillStyle = radgrad;
-		ctx.beginPath();
-		ctx.arc(chargeArray[i].xPos, chargeArray[i].yPos, oneRadius, 0, Math.PI*2, true);
-		ctx.fill();
 	}
 	ctx.strokeStyle = "#99CCFF";
 
@@ -514,29 +536,32 @@ function changedDraw() {
 			x1 = 0;
 			y1 = 0;
 			for (var j = 0; j < chargeArray.length; j++){
-				d = (chargeArray[j].xPos - xMiddle) * (chargeArray[j].xPos - xMiddle) + (chargeArray[j].yPos - yMiddle) * (chargeArray[j].yPos - yMiddle);
-				if (d < 500) {
-					check = 1;
-					break;
-				}
-				d = d / 1000000;
-				if (xMiddle - chargeArray[j].xPos > -0.01 && xMiddle - chargeArray[j].xPos < 0.01){
-					s = Math.PI/2;
-					if (yMiddle - chargeArray[j].yPos < 0){
-						s = -(Math.PI/2);
+				if (chargeArray[j].pointOrLine == 1){
+					d = (chargeArray[j].xPos - xMiddle) * (chargeArray[j].xPos - xMiddle) + (chargeArray[j].yPos - yMiddle) * (chargeArray[j].yPos - yMiddle);
+					if (d < 500) {
+						check = 1;
+						break;
 					}
-				}
-				else {
-					s = (yMiddle - chargeArray[j].yPos)/(xMiddle - chargeArray[j].xPos);
-					s = slopeToRad(s);
-					if ((yMiddle - chargeArray[j].yPos > 0 && s < 0) || (yMiddle - chargeArray[j].yPos < 0 && s > 0)) {
-						s = Math.PI + s;
+					d = d / 1000000;
+					if (xMiddle - chargeArray[j].xPos > -0.01 && xMiddle - chargeArray[j].xPos < 0.01){
+						s = Math.PI/2;
+						if (yMiddle - chargeArray[j].yPos < 0){
+							s = -(Math.PI/2);
+						}
 					}
+					else {
+						s = (yMiddle - chargeArray[j].yPos)/(xMiddle - chargeArray[j].xPos);
+						s = slopeToRad(s);
+						if ((yMiddle - chargeArray[j].yPos > 0 && s < 0) || (yMiddle - chargeArray[j].yPos < 0 && s > 0)) {
+							s = Math.PI + s;
+						}
+					}
+					if (chargeArray[j].polarity == -1) s = s + Math.PI;
+					if (s > 2 * Math.PI) s = s - 2 * Math.PI;
+					x1 += (Math.cos(s) * chargeArray[j].pointChargeStrength/d);
+					y1 += (Math.sin(s) * chargeArray[j].pointChargeStrength/d);
 				}
-				if (chargeArray[j].polarity == -1) s = s + Math.PI;
-				if (s > 2 * Math.PI) s = s - 2 * Math.PI;
-				x1 += (Math.cos(s) * chargeArray[j].pointChargeStrength/d);
-				y1 += (Math.sin(s) * chargeArray[j].pointChargeStrength/d);
+				else {}
 			}
 			if (check != 1){
 	 	    	if (x1 < 0.01 && x1 > -0.01){
@@ -566,7 +591,6 @@ function changedDraw() {
 			else check = 0;
  	   	}
 	}
-	// ctx.stroke();
 }
 
 function slopeToRad (slope){
