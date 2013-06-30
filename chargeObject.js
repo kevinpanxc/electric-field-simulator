@@ -30,7 +30,7 @@ chargeElement.prototype.initPointCharge = function (xPos, yPos, polarity, pointC
 	return this;
 };
 
-chargeElement.prototype.initLineChargeByAngle = function (sXPos, sYPos, length, angle, polarity, linearChargeDensity, chargeResolution) {
+chargeElement.prototype.initLineChargeByAngle = function (sXPos, sYPos, length, angle, polarity, linearChargeDensity, chargeResolution, id) {
 	this.sXPos = sXPos;
 	this.sYPos = sYPos;
 	this.length = length;
@@ -38,12 +38,13 @@ chargeElement.prototype.initLineChargeByAngle = function (sXPos, sYPos, length, 
 	this.polarity = polarity;
 	this.linearChargeDensity = linearChargeDensity;
 	this.chargeResolution = chargeResolution;
+	this.id = id;
 
 	this.pointOrLine = -1;
 	return this;
 };
 
-chargeElement.prototype.initLineChargeByStartEnd = function (sXPos, sYPos, eXPos, eYPos, polarity, linearChargeDensity, chargeResolution) {
+chargeElement.prototype.initLineChargeByStartEnd = function (sXPos, sYPos, eXPos, eYPos, polarity, linearChargeDensity, chargeResolution, id) {
 	this.sXPos = sXPos;
 	this.sYPos = sYPos;
 	this.eXPos = eXPos;
@@ -51,6 +52,7 @@ chargeElement.prototype.initLineChargeByStartEnd = function (sXPos, sYPos, eXPos
 	this.polarity = polarity;
 	this.linearChargeDensity = linearChargeDensity;
 	this.chargeResolution = chargeResolution;
+	this.id = id;
 
 	this.pointOrLine = -1;
 	return this;
