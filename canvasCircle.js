@@ -6,6 +6,8 @@ var intervalID;
 var intervalTime = 32;
 
 var isMouseDown = false;
+var isMouseOverRotate = false;
+var isMouseDownToRotate = false;
 var currentIndex = 0;
 
 // Canvas Dimensions
@@ -13,8 +15,9 @@ var canvasW = 0;
 var canvasH = 0;
 
 // Puck Dimensions (and Half thereof)
-var oneRadius = 15;
-var lineCircleRadius = 6;
+var radiusOne = 15;
+var radiusLineCircle = 6;
+var radiusRotate = 3;
 
 // Pushing first charge
 var chargeId = 0;
@@ -83,19 +86,19 @@ function reDraw() {
 	ctx.beginPath();
 	if (chargeArray[currentIndex].pointOrLine == 1){
 		ctx.strokeStyle = "#FFFF00";
-		ctx.arc(chargeArray[currentIndex].xPos, chargeArray[currentIndex].yPos, oneRadius + 1, 0, Math.PI*2, true);
+		ctx.arc(chargeArray[currentIndex].xPos, chargeArray[currentIndex].yPos, radiusOne + 1, 0, Math.PI*2, true);
 	}
 	else {
 		ctx.strokeStyle = "#FFFF00";
 		if (chargeArray[currentIndex].sXPos > chargeArray[currentIndex].eXPos) {
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, lineCircleRadius + 5, Math.PI/2 + chargeArray[currentIndex].angle, 3*(Math.PI/2) + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, lineCircleRadius + 5, 3*(Math.PI/2) + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, lineCircleRadius + 5, Math.PI/2 + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, 3*(Math.PI/2) + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, radiusLineCircle + 5, 3*(Math.PI/2) + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
 		}
 		else {
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, lineCircleRadius + 5, 3*(Math.PI/2) + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, lineCircleRadius + 5, Math.PI/2 + chargeArray[currentIndex].angle, 3*(Math.PI/2) + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, lineCircleRadius + 5, Math.PI/2 + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, 3*(Math.PI/2) + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, 3*(Math.PI/2) + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
 		}
 	}
 	ctx.stroke();
@@ -106,9 +109,10 @@ function changedDraw() {
 	var y = 25;
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	for (var i = 0; i < chargeArray.length; i++){
-		if (chargeArray[i].pointOrLine == 1){
-			radgrad = ctx.createRadialGradient(chargeArray[i].xPos,chargeArray[i].yPos,5,chargeArray[i].xPos,chargeArray[i].yPos,15);
-			if(chargeArray[i].polarity == 1){
+		var currentElement = chargeArray[i];
+		if (currentElement.pointOrLine == 1){
+			radgrad = ctx.createRadialGradient(currentElement.xPos,currentElement.yPos,5,currentElement.xPos,currentElement.yPos,15);
+			if(currentElement.polarity == 1){
 				radgrad.addColorStop(0, 'rgba(0,0,0,1)');
 				radgrad.addColorStop(0.8, 'rgba(200,200,200,.9)');
 				radgrad.addColorStop(1, 'rgba(255,255,255,0)');
@@ -120,16 +124,16 @@ function changedDraw() {
 			}
 			ctx.fillStyle = radgrad;
 			ctx.beginPath();
-			ctx.arc(chargeArray[i].xPos, chargeArray[i].yPos, oneRadius, 0, Math.PI*2, true);
+			ctx.arc(currentElement.xPos, currentElement.yPos, radiusOne, 0, Math.PI*2, true);
 			ctx.fill();
 		}
 		else {
-			var charge = chargeArray[i];
 			ctx.beginPath();
-			ctx.strokeStyle = "#000000";
-			ctx.lineWidth = oneRadius;
-			ctx.moveTo(charge.sXPos, charge.sYPos);
-			ctx.lineTo(charge.eXPos, charge.eYPos);
+			if(currentElement.polarity == 1) ctx.strokeStyle = "#222222";
+			else ctx.strokeStyle = "#F04D4D";
+			ctx.lineWidth = radiusOne;
+			ctx.moveTo(currentElement.sXPos, currentElement.sYPos);
+			ctx.lineTo(currentElement.eXPos, currentElement.eYPos);
 			ctx.lineCap = "round";
 			ctx.stroke();
 			ctx.lineWidth = 1;
@@ -137,7 +141,9 @@ function changedDraw() {
 
 			ctx.fillStyle = "#6EA6F5";
 			ctx.beginPath();
-			ctx.arc(charge.centerX, charge.centerY, lineCircleRadius, 0, Math.PI*2, true);
+			ctx.arc(currentElement.centerX, currentElement.centerY, radiusLineCircle, 0, Math.PI*2, true);
+			ctx.arc(currentElement.sXPos, currentElement.sYPos, radiusRotate, 0, Math.PI * 2, true);
+			ctx.arc(currentElement.eXPos, currentElement.eYPos, radiusRotate, 0, Math.PI * 2, true);
 			ctx.fill();
 		}
 	}
@@ -224,37 +230,39 @@ function slopeToRad (slope){
 }
 
 function mouseMoved(e){
-	if ( cursorOverCircle(e.pageX, e.pageY) >= 0 )
-    {
-        document.body.style.cursor = 'pointer';
-    }
-    else
-    {
-        document.body.style.cursor = 'default';
-    }
-    if (isMouseDown)
-    {
+    if (isMouseDown) {
+    	document.body.style.cursor = 'pointer';
     	var newXPosition = (e.pageX - canvas.offsetLeft) - cursorX;
     	var newYPosition = (e.pageY - canvas.offsetTop) - cursorY;
-    	if (chargeArray[currentIndex].pointOrLine == 1){
-    		var id = chargeArray[currentIndex].id;
-	        chargeArray[currentIndex].xPos = newXPosition;
-	        chargeArray[currentIndex].yPos = newYPosition;
+    	var currentElement = chargeArray[currentIndex];
+    	if (currentElement.pointOrLine == 1){
+    		var id = currentElement.id;
+	        currentElement.xPos = newXPosition;
+	        currentElement.yPos = newYPosition;
 	        if (document.getElementById("eb" + id).alt == -1){
-				document.getElementById("xPos" + id).innerHTML = chargeArray[currentIndex].xPos;
-	        	document.getElementById("yPos" + id).innerHTML = chargeArray[currentIndex].yPos;
+				document.getElementById("xPos" + id).innerHTML = currentElement.xPos;
+	        	document.getElementById("yPos" + id).innerHTML = currentElement.yPos;
 	        } 
     	}
     	else {
-    		var xDiff = chargeArray[currentIndex].centerX - chargeArray[currentIndex].eXPos;
-    		var yDiff = chargeArray[currentIndex].centerY - chargeArray[currentIndex].eYPos;
-    		chargeArray[currentIndex].centerX = newXPosition;
-	        chargeArray[currentIndex].centerY = newYPosition;
-	        chargeArray[currentIndex].sXPos = newXPosition + xDiff;
-	        chargeArray[currentIndex].eXPos = newXPosition - xDiff;
-	        chargeArray[currentIndex].sYPos = newYPosition + yDiff;
-	        chargeArray[currentIndex].eYPos = newYPosition - yDiff;
+    		if (isMouseDownToRotate){
+    			rotateLine(e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetTop);
+    		}
+    		else {
+    			var xDiff = currentElement.centerX - currentElement.eXPos;
+	    		var yDiff = currentElement.centerY - currentElement.eYPos;
+	    		currentElement.centerX = newXPosition;
+		        currentElement.centerY = newYPosition;
+		        currentElement.sXPos = newXPosition + xDiff;
+		        currentElement.eXPos = newXPosition - xDiff;
+		        currentElement.sYPos = newYPosition + yDiff;
+		        currentElement.eYPos = newYPosition - yDiff;
+    		}
     	}
+    }
+    else {
+    	if ( cursorOverCircle(e.pageX, e.pageY) >= 0 ) document.body.style.cursor = 'pointer';
+	    else document.body.style.cursor = 'default';
     }
 	var probeMagnitude = document.getElementById("probeMagnitude");
 	var probeAngle = document.getElementById("probeAngle");
@@ -313,9 +321,9 @@ function mouseMoved(e){
     }
 }
 
-function mouseUp()
-{
+function mouseUp(){
     isMouseDown = false;
+    isMouseDownToRotate = false;
     clearInterval(intervalID);
     reDraw(); // sometimes interval is cleared too fast and last drawn location of charge object not the same as actual position recorded
 }
@@ -336,32 +344,40 @@ function mouseDown(e){
 	        cursorY = (e.pageY - canvas.offsetTop) - chargeArray[currentIndex].centerY;
 	    }
 	    isMouseDown = true;
+	    if (isMouseOverRotate) isMouseDownToRotate = true;
 	}
 }
 
-function cursorOverCircle(x, y)
-{
-
+function cursorOverCircle(x, y){
     for (var i = chargeArray.length - 1; i >= 0; i--){
     	if (chargeArray[i].pointOrLine == 1){
-    		if ((x - canvas.offsetLeft) > (chargeArray[i].xPos - oneRadius)  &&  (x - canvas.offsetLeft) < (chargeArray[i].xPos + oneRadius)
-	        && (y - canvas.offsetTop) > (chargeArray[i].yPos - oneRadius)   &&  (y - canvas.offsetTop) < (chargeArray[i].yPos + oneRadius)){
+    		if ((x - canvas.offsetLeft) > (chargeArray[i].xPos - radiusOne)  &&  (x - canvas.offsetLeft) < (chargeArray[i].xPos + radiusOne)
+	        && (y - canvas.offsetTop) > (chargeArray[i].yPos - radiusOne)   &&  (y - canvas.offsetTop) < (chargeArray[i].yPos + radiusOne)){
 	    		return i;
 	        }
     	}
     	else {
-    		if ((x - canvas.offsetLeft) > (chargeArray[i].centerX - lineCircleRadius)  &&  (x - canvas.offsetLeft) < (chargeArray[i].centerX + lineCircleRadius)
-	        && (y - canvas.offsetTop) > (chargeArray[i].centerY - lineCircleRadius)   &&  (y - canvas.offsetTop) < (chargeArray[i].centerY + lineCircleRadius)){
+    		if ((x - canvas.offsetLeft) > (chargeArray[i].centerX - radiusLineCircle)  &&  (x - canvas.offsetLeft) < (chargeArray[i].centerX + radiusLineCircle)
+	        && (y - canvas.offsetTop) > (chargeArray[i].centerY - radiusLineCircle)   &&  (y - canvas.offsetTop) < (chargeArray[i].centerY + radiusLineCircle)){
+	    		return i;
+	        }
+	        else if ((x - canvas.offsetLeft) > (chargeArray[i].sXPos - radiusRotate)  &&  (x - canvas.offsetLeft) < (chargeArray[i].sXPos + radiusRotate)
+	        && (y - canvas.offsetTop) > (chargeArray[i].sYPos - radiusRotate)   &&  (y - canvas.offsetTop) < (chargeArray[i].sYPos + radiusRotate)){
+	    		isMouseOverRotate = true;
+	    		return i;
+	        }
+	        else if ((x - canvas.offsetLeft) > (chargeArray[i].eXPos - radiusRotate)  &&  (x - canvas.offsetLeft) < (chargeArray[i].eXPos + radiusRotate)
+	        && (y - canvas.offsetTop) > (chargeArray[i].eYPos - radiusRotate)   &&  (y - canvas.offsetTop) < (chargeArray[i].eYPos + radiusRotate)){
+	    		isMouseOverRotate = true;
 	    		return i;
 	        }
     	}
     }
-
+    isMouseOverRotate = false;
     return -1;
 }
 
-function addPosPointCharge()
-{
+function addPosPointCharge(){
 	var inputStrength = document.getElementById("strengthText");
 	var xPosition = document.getElementById("xPosText");
 	var yPosition = document.getElementById("yPosText");
@@ -402,8 +418,7 @@ function addPosPointCharge()
 	reDraw();
 }
 
-function addNegPointCharge()
-{
+function addNegPointCharge(){
 	var inputStrength = document.getElementById("strengthText");
 	var xPosition = document.getElementById("xPosText");
 	var yPosition = document.getElementById("yPosText");
@@ -455,6 +470,40 @@ function addPosLineCharge() {
 	newCharge.centerX = determineCenter(sXPos, eXPos);
 	newCharge.centerY = determineCenter(sYPos, eYPos);
 	newCharge.angle = findAngle(sXPos, eXPos, sYPos, eYPos);
+	newCharge.length = findLength(sXPos, eXPos, sYPos, eYPos);
+	chargeArray.push(newCharge);
+	currentIndex = chargeArray.length - 1;
+	updateChargeListLineCharge();
+	document.getElementById("li" + chargeId).className = "liClassShade";
+	if (chargeArray.length == 1) {
+		canvas.onmouseup = mouseUp;
+	    canvas.onmousedown = mouseDown;
+	    canvas.onmousemove = mouseMoved;
+		reDraw();
+	}
+	else {
+		document.getElementById("li" + selectedId).className = "liClassNoShade";
+	}
+
+	selectedId = chargeId;
+	highestID = chargeId;
+	chargeId++;
+
+	reDraw();
+}
+
+function addNegLineCharge() {
+	var sXPos = 100;
+	var sYPos = 50;
+	var eXPos = 50;
+	var eYPos = 100;
+	var polarity = 1;
+
+	var newCharge = new chargeElement().initLineChargeByStartEnd(sXPos, sYPos, eXPos, eYPos, -1, 0, 0, chargeId);
+	newCharge.centerX = determineCenter(sXPos, eXPos);
+	newCharge.centerY = determineCenter(sYPos, eYPos);
+	newCharge.angle = findAngle(sXPos, eXPos, sYPos, eYPos);
+	newCharge.length = findLength(sXPos, eXPos, sYPos, eYPos);
 	chargeArray.push(newCharge);
 	currentIndex = chargeArray.length - 1;
 	updateChargeListLineCharge();
@@ -491,8 +540,44 @@ function findAngle (sXPos, eXPos, sYPos, eYPos) {
 	else if (eYPos == sYPos) return 0;
 	height = eYPos - sYPos;
 	length = eXPos - sXPos;
-	angle = Math.atan(height/length);
+	angle = Math.atan(height/length); 
+	// if line is / then the angle will definitely be negative
+	// if line is \ then the angle will definitely be positive
+	// angle range will only be from Math.PI/2 to -Math.PI/2
 	return angle;
+}
+
+function findLength(sXPos, eXPos, sYPos, eYPos){
+	var xLength = eXPos - sXPos;
+	var yLength = eYPos - sYPos;
+
+	return Math.sqrt((xLength * xLength) + (yLength * yLength));
+}
+
+function rotateLine(mouseX, mouseY) {
+	var angle;
+	var length;
+	var height;
+	var index = chargeArray.length - 1;
+	if (mouseX == chargeArray[index].centerX) {
+		chargeArray[index].sXPos = chargeArray[index].centerX;
+		chargeArray[index].sYPos = chargeArray[index].centerY + Math.ceil(length/2);
+		chargeArray[index].eXPos = chargeArray[index].centerX;
+		chargeArray[index].eYPos = chargeArray[index].centerY - Math.ceil(length/2);
+	}
+	else {
+		height = chargeArray[index].centerY - mouseY;
+		length = chargeArray[index].centerX - mouseX;
+		angle = Math.atan(height/length);
+		// alert(angle);
+		var newAddedXPos = Math.ceil(chargeArray[index].length/2) * Math.cos(-angle);
+		var newAddedYPos = Math.ceil(chargeArray[index].length/2) * Math.sin(-angle);
+		chargeArray[index].angle = angle;
+		chargeArray[index].sXPos = chargeArray[index].centerX + newAddedXPos;
+		chargeArray[index].sYPos = chargeArray[index].centerY - newAddedYPos;
+		chargeArray[index].eXPos = chargeArray[index].centerX - newAddedXPos;
+		chargeArray[index].eYPos = chargeArray[index].centerY + newAddedYPos;
+	}
 }
 
 function updateChargeListPointCharge () {
