@@ -37,27 +37,44 @@
 			<div class = "toolInnerContainer">
 				<div id="addPositive" onclick="addPosLineCharge()" title="Add Positive Line Charge"></div>
 				<div id="addNegative" onclick="addNegLineCharge()" title="Add Negative Line Charge"></div>
-				<div class="expContainer">
+				<div class="expContainer startEnd lengthAngle">
 					<span class="promptStyle">CHARGE DENSITY: </span>
-					<input type="text" class="textContainer" id="">
+					<input type="text" class="textContainer" id="chargeDensityText">
 				</div>
-				<div class="expContainer">
+				<div class="expContainer lengthAngle">
 					<span class="promptStyle">START X: </span>
-					<input type="text" class="textContainer" id="">
+					<input type="text" class="textContainer" id="startXTextLengthAngle">
 				</div>
-				<div class="expContainer">			
+				<div class="expContainer lengthAngle">
 					<span class="promptStyle">START Y: </span>
-					<input type="text" class="textContainer" id="">
+					<input type="text" class="textContainer" id="startYTextLengthAngle">
 				</div>
-				<div class="expContainer">
+				<div class="expContainer lengthAngle">
+					<span class="promptStyle">ANGLE: </span>
+					<input type="text" class="textContainer" id="angleText">
+				</div>
+				<div class="expContainer lengthAngle">
+					<span class="promptStyle">LENGTH: </span>
+					<input type="text" class="textContainer" id="lengthText">
+				</div>
+				<div class="expContainer startEnd">
+					<span class="promptStyle">START X: </span>
+					<input type="text" class="textContainer" id="startXTextStartEnd">
+				</div>
+				<div class="expContainer startEnd">			
+					<span class="promptStyle">START Y: </span>
+					<input type="text" class="textContainer" id="startYTextStartEnd">
+				</div>
+				<div class="expContainer startEnd">
 					<span class="promptStyle">END X: </span>
-					<input type="text" class="textContainer" id="">
+					<input type="text" class="textContainer" id="endXText">
 				</div>
-				<div class="expContainer">			
+				<div class="expContainer startEnd">			
 					<span class="promptStyle">END Y: </span>
-					<input type="text" class="textContainer" id="">
+					<input type="text" class="textContainer" id="endYText">
 				</div>
-				<button class="expandable">options</button>
+				<button class="expandableInline" id="addLineChargeStartEnd">start-end</button>
+				<button class="expandableInline" id="addLineChargeLengthAngle">length-angle</button>
 			</div>
 			<div class = "toolInnerContainer">
 				<div id="probeButton" onclick="probe()" title="Test Electric Field Strength"></div>

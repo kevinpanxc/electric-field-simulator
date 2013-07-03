@@ -460,6 +460,8 @@ function addNegPointCharge(){
 }
 
 function addPosLineCharge() {
+	// alert($("#endXText").parent().css('display'));
+
 	var sXPos = 100;
 	var sYPos = 50;
 	var eXPos = 50;
@@ -569,7 +571,6 @@ function rotateLine(mouseX, mouseY) {
 		height = chargeArray[index].centerY - mouseY;
 		length = chargeArray[index].centerX - mouseX;
 		angle = Math.atan(height/length);
-		// alert(angle);
 		var newAddedXPos = Math.ceil(chargeArray[index].length/2) * Math.cos(-angle);
 		var newAddedYPos = Math.ceil(chargeArray[index].length/2) * Math.sin(-angle);
 		chargeArray[index].angle = angle;
