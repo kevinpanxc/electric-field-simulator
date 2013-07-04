@@ -46,6 +46,7 @@ var distanceScale = 1;
 
 // for the update options box
 var defaultTextBoxBorderColor;
+var errorTextBoxBorderColor = "#FF1414";
 
 function init(){
     canvas = document.getElementById("canvas");
@@ -90,15 +91,17 @@ function reDraw() {
 	}
 	else {
 		ctx.strokeStyle = "#FFFF00";
+		var angleOne = Math.PI/2 + chargeArray[currentIndex].angle;
+		var angleTwo = 3*(Math.PI/2) + chargeArray[currentIndex].angle;
 		if (chargeArray[currentIndex].sXPos > chargeArray[currentIndex].eXPos) {
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, 3*(Math.PI/2) + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, radiusLineCircle + 5, 3*(Math.PI/2) + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, angleOne, angleTwo, true);
+			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, radiusLineCircle + 5, angleTwo, angleOne, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, angleOne, angleOne, true);
 		}
 		else {
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, 3*(Math.PI/2) + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, 3*(Math.PI/2) + chargeArray[currentIndex].angle, true);
-			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, Math.PI/2 + chargeArray[currentIndex].angle, Math.PI/2 + chargeArray[currentIndex].angle, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, angleTwo, angleOne, true);
+			ctx.arc(chargeArray[currentIndex].eXPos, chargeArray[currentIndex].eYPos, radiusLineCircle + 5, angleOne, angleTwo, true);
+			ctx.arc(chargeArray[currentIndex].sXPos, chargeArray[currentIndex].sYPos, radiusLineCircle + 5, angleTwo, angleTwo, true);
 		}
 	}
 	ctx.stroke();
@@ -396,7 +399,7 @@ function addPosPointCharge(){
 		yPos = Math.floor(Math.random() * 500) + 50;
 	}
 	else if (isNaN(xPos) || isNaN(yPos)) return;
-	else if (xPos < 0 || yPos < 0) return;
+	else if (xPos < 0 || xPos > 600 || yPos < 0 || yPos > 600) return;
 	var newCharge = new chargeElement().initPointCharge(xPos, yPos, polarity, strength, chargeId);
 	chargeArray.push(newCharge);
 	currentIndex = chargeArray.length - 1;
@@ -437,7 +440,7 @@ function addNegPointCharge(){
 		yPos = Math.floor(Math.random() * 500) + 50;
 	}
 	else if (isNaN(xPos) || isNaN(yPos)) return;
-	else if (xPos < 0 || yPos < 0) return;
+	else if (xPos < 0 || xPos > 600 || yPos < 0 || yPos > 600) return;
 	var newCharge = new chargeElement().initPointCharge(xPos, yPos, polarity, strength, chargeId);
 	chargeArray.push(newCharge);
 	currentIndex = chargeArray.length - 1;
@@ -460,17 +463,44 @@ function addNegPointCharge(){
 }
 
 function addPosLineCharge() {
-	// alert($("#endXText").parent().css('display'));
-
-	var sXPos = 100;
-	var sYPos = 50;
-	var eXPos = 50;
-	var eYPos = 100;
+	var byStartEnd = !document.getElementById("addLineChargeStartEnd").disabled;
+	var byAngleLength = !document.getElementById("addLineChargeLengthAngle").disabled;
 	var polarity = 1;
+	if (byStartEnd && byAngleLength) {
+		var chargeDensity = 1;
+		var sXPos = 50;
+		var sYPos = 100;
+		var eXPos = 100;
+		var eYPos = 50;
+	}
+	else if (byStartEnd){
+		if (!validateAddLineChargeForm(1)) return;
+		var chargeDensity = document.getElementById("chargeDensityText").value;
+		var sXPos = document.getElementById("startXTextStartEnd").value;
+		var sYPos = document.getElementById("startYTextStartEnd").value;
+		var eXPos = document.getElementById("endXText").value;
+		var eYPos = document.getElementById("endYText").value;
+	}
+	else {
+		if (!validateAddLineChargeForm(2)) return;
+		var chargeDensity = document.getElementById("chargeDensityText").value;
+		var angle = document.getElementById("angleText").value;
+		var length = document.getElementById("lengthText").value;
+		var sXPos = document.getElementById("startXTextLengthAngle").value;
+		var sYPos = document.getElementById("startYTextLengthAngle").value;
+
+		var eXPos = determineXEndPoint(sXPos, angle, length);
+		var eYPos = determineYEndPoint(sYPos, angle, length);
+	}
 
 	var newCharge = new chargeElement().initLineChargeByStartEnd(sXPos, sYPos, eXPos, eYPos, 1, 0, 0, chargeId);
 	newCharge.centerX = determineCenter(sXPos, eXPos);
 	newCharge.centerY = determineCenter(sYPos, eYPos);
+
+	if (newCharge.centerX < 0 || newCharge.centerX > 600 || newCharge.centerY < 0 || newCharge.centerY > 600){
+		return;
+	}
+
 	newCharge.angle = findAngle(sXPos, eXPos, sYPos, eYPos);
 	newCharge.length = findLength(sXPos, eXPos, sYPos, eYPos);
 	chargeArray.push(newCharge);
@@ -527,11 +557,68 @@ function addNegLineCharge() {
 	reDraw();
 }
 
+function validateAddLineChargeForm (method) {
+	var chargeDensity = document.getElementById("chargeDensityText");
+	if (method == 1) {
+		var startXTextStartEnd = document.getElementById("startXTextStartEnd");
+		var startYTextStartEnd = document.getElementById("startYTextStartEnd");
+		var endXText = document.getElementById("endXText");
+		var endYText = document.getElementById("endYText");
+
+		if (isNaN(chargeDensity.value) || isNaN(startXTextStartEnd.value) || isNaN(startYTextStartEnd.value) || isNaN(endXText.value) || isNaN(endYText.value)){
+			return false;
+		}
+		else if (chargeDensity.value <= 0) {
+			return false;
+		}
+		else if (startXTextStartEnd.value < 0 || startYTextStartEnd.value < 0 || endXText.value < 0 || endYText.value < 0) {
+			return false;
+		}
+		else if (startXTextStartEnd.value > 600 || startYTextStartEnd.value > 600 || endXText.value > 600 || endYText.value > 600) {
+			return false;
+		}
+		else if ((startXTextStartEnd.value + startYTextStartEnd.value + endXText.value + endYText.value) == 0) {
+			return false;
+		}
+		else return true;
+	}
+	else {
+		var angleText = document.getElementById("angleText");
+		var lengthText = document.getElementById("lengthText");
+		var startXTextLengthAngle = document.getElementById("startXTextLengthAngle");
+		var startYTextLengthAngle = document.getElementById("startYTextLengthAngle");
+
+		if (isNaN(chargeDensity.value) || isNaN(angleText.value) || isNaN(lengthText.value) || isNaN(startXTextLengthAngle.value) || isNaN(startYTextLengthAngle.value)){
+			return false;
+		}
+		else if (chargeDensity.value <= 0) {
+			return false;
+		}
+		else if (lengthText.value <= 0 || startXTextLengthAngle.value < 0 || startYTextLengthAngle.value < 0){
+			return false;
+		}
+		else if (startXTextLengthAngle.value > 600 || startYTextLengthAngle.value > 600) {
+			return false;
+		}
+		else return true;
+	}
+}
+
 function determineCenter (first, second) {
 	var center;
-	if (second > first) center = Math.floor((second - first)/2) + first;
-	else center = Math.floor((first - second)/2) + second;
+	if (second > first) center = Math.floor((second - first)/2) + parseInt(first);
+	else center = Math.floor((first - second)/2) + parseInt(second);
 	return center;
+}
+
+function determineXEndPoint (xPos, angle, length) {
+	var xEndPoint = xPos + Math.cos(angle);
+	return xEndPoint;
+}
+
+function determineYEndPoint (yPos, angle, length) {
+	var yEndPoint = yPos - Math.sin(angle);
+	return yEndPoint;
 }
 
 function findAngle (sXPos, eXPos, sYPos, eYPos) {
@@ -1022,22 +1109,16 @@ function updateCharge (id) {
 	var yPosText = document.getElementById("optionsYPOS").value;
 	var polarity = document.getElementById("polarityDivPic").alt;
 
-	// conditions for when it doesn't work
-	if ((isNaN(xPosText) || xPosText == "") || (isNaN(yPosText) || yPosText == "")){
-		if (isNaN(xPosText) || xPosText == ""){
-			document.getElementById("optionsXPOS").style.borderColor = "#FF1414";
-		}
-		else {
-			document.getElementById("optionsXPOS").style.borderColor = defaultTextBoxBorderColor;
-		}
-		if (isNaN(yPosText) || yPosText == ""){
-			document.getElementById("optionsYPOS").style.borderColor = "#FF1414";
-		}
-		else {
-			document.getElementById("optionsYPOS").style.borderColor = defaultTextBoxBorderColor;
-		}
-	}
-	else {
+	var xPosHasError = false;
+	var yPosHasError = false;
+
+	if (isNaN(xPosText) || xPosText == "") xPosHasError = true;
+	else if (xPosText < 0 || xPosText > 600) xPosHasError = true;
+
+	if (isNaN(yPosText) || yPosText == "") yPosHasError = true;
+	else if (yPosText < 0 || yPosText > 600) yPosHasError = true;
+
+	if (!xPosHasError && !yPosHasError) {
 		chargeObjectUpdate.xPos = xPosText;
 		chargeObjectUpdate.yPos = yPosText;
 		chargeObjectUpdate.polarity = polarity;
@@ -1051,6 +1132,22 @@ function updateCharge (id) {
 		closeOptionsPopUp(true);
 
 		reDraw();
+
+		return;
+	}
+
+	if (xPosHasError) {
+		document.getElementById("optionsXPOS").style.borderColor = errorTextBoxBorderColor;
+	}
+	else {
+		document.getElementById("optionsXPOS").style.borderColor = defaultTextBoxBorderColor;
+	}
+
+	if (yPosHasError) {
+		document.getElementById("optionsYPOS").style.borderColor = errorTextBoxBorderColor;
+	}
+	else {
+		document.getElementById("optionsYPOS").style.borderColor = defaultTextBoxBorderColor;
 	}
 }
 

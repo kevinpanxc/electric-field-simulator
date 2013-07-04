@@ -1,12 +1,12 @@
 $(function() {
-    $(".expContainer").hide();
+    $(".expContainer").css("display", "none");
 
     $(".expandable").toggle(function() {         
         $(this).prevAll(".expContainer").slideDown();         
     }, function() {                      
         $(this).prevAll(".expContainer").slideUp();        
     });
-
+    
     $("#addLineChargeStartEnd").toggle(function() { 
         $("#addLineChargeLengthAngle").attr("disabled", true);
         $(this).prevAll(".startEnd").slideDown();         
