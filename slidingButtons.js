@@ -1,5 +1,5 @@
 $(function() {
-    $(".expContainer").css("display", "none");
+    $(".expContainer").hide();
 
     $(".expandable").toggle(function() {         
         $(this).prevAll(".expContainer").slideDown();         

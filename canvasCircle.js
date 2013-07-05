@@ -145,6 +145,9 @@ function changedDraw() {
 			ctx.fillStyle = "#6EA6F5";
 			ctx.beginPath();
 			ctx.arc(currentElement.centerX, currentElement.centerY, radiusLineCircle, 0, Math.PI*2, true);
+			ctx.fill();
+			// ie needs this
+			ctx.beginPath();
 			ctx.arc(currentElement.sXPos, currentElement.sYPos, radiusRotate, 0, Math.PI * 2, true);
 			ctx.arc(currentElement.eXPos, currentElement.eYPos, radiusRotate, 0, Math.PI * 2, true);
 			ctx.fill();
@@ -248,6 +251,7 @@ function mouseMoved(e){
 	        } 
     	}
     	else {
+    		var id = currentElement.id;
     		if (isMouseDownToRotate){
     			rotateLine(e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetTop);
     		}
@@ -256,11 +260,18 @@ function mouseMoved(e){
 	    		var yDiff = currentElement.centerY - currentElement.eYPos;
 	    		currentElement.centerX = newXPosition;
 		        currentElement.centerY = newYPosition;
-		        currentElement.sXPos = newXPosition + xDiff;
-		        currentElement.eXPos = newXPosition - xDiff;
-		        currentElement.sYPos = newYPosition + yDiff;
-		        currentElement.eYPos = newYPosition - yDiff;
+		        currentElement.sXPos = Math.round(newXPosition + xDiff);
+		        currentElement.eXPos = Math.round(newXPosition - xDiff);
+		        currentElement.sYPos = Math.round(newYPosition + yDiff);
+		        currentElement.eYPos = Math.round(newYPosition - yDiff);
     		}
+    		if (document.getElementById("eb" + id).alt == -1){
+				document.getElementById("startCoordsX" + id).innerHTML = currentElement.sXPos;
+	        	document.getElementById("startCoordsY" + id).innerHTML = currentElement.sYPos;
+	        	document.getElementById("endCoordsX" + id).innerHTML = currentElement.eXPos;
+	        	document.getElementById("endCoordsY" + id).innerHTML = currentElement.eYPos;
+	        	document.getElementById("angle" + id).innerHTML = -(currentElement.angle).toFixed(4);
+	        } 
     	}
     }
     else {
@@ -380,14 +391,15 @@ function cursorOverCircle(x, y){
     return -1;
 }
 
-function addPosPointCharge(){
+function addPointCharge(polarityPassedIn){
 	var inputStrength = document.getElementById("strengthText");
 	var xPosition = document.getElementById("xPosText");
 	var yPosition = document.getElementById("yPosText");
 	var strength = Number(inputStrength.value);
 	var xPos = Number(xPosition.value);
 	var yPos = Number(yPosition.value);
-	var polarity = 1;
+	if (polarityPassedIn == 1) var polarity = 1;
+	else if (polarityPassedIn == -1) var polarity = -1;
 	if (inputStrength.value == "") strength = 1;
 	else if(isNaN(strength) || strength == 0) return;
 	else if (strength < 0) {
@@ -395,8 +407,8 @@ function addPosPointCharge(){
 		polarity = -polarity;
 	}
 	if (xPosition.value == "" || yPosition.value == "") {
-		xPos = Math.floor(Math.random() * 500) + 50;
-		yPos = Math.floor(Math.random() * 500) + 50;
+		xPos = Math.round(Math.random() * 500) + 50;
+		yPos = Math.round(Math.random() * 500) + 50;
 	}
 	else if (isNaN(xPos) || isNaN(yPos)) return;
 	else if (xPos < 0 || xPos > 600 || yPos < 0 || yPos > 600) return;
@@ -421,51 +433,12 @@ function addPosPointCharge(){
 	reDraw();
 }
 
-function addNegPointCharge(){
-	var inputStrength = document.getElementById("strengthText");
-	var xPosition = document.getElementById("xPosText");
-	var yPosition = document.getElementById("yPosText");
-	var strength = Number(inputStrength.value);
-	var xPos = Number(xPosition.value);
-	var yPos = Number(yPosition.value);
-	var polarity = -1;
-	if (inputStrength.value == "") strength = 1;
-	else if(isNaN(strength) || strength == 0) return;
-	else if (strength < 0) {
-		strength = -strength;
-		polarity = -polarity;
-	}
-	if (xPosition.value == "" || yPosition.value == "") {
-		xPos = Math.floor(Math.random() * 500) + 50;
-		yPos = Math.floor(Math.random() * 500) + 50;
-	}
-	else if (isNaN(xPos) || isNaN(yPos)) return;
-	else if (xPos < 0 || xPos > 600 || yPos < 0 || yPos > 600) return;
-	var newCharge = new chargeElement().initPointCharge(xPos, yPos, polarity, strength, chargeId);
-	chargeArray.push(newCharge);
-	currentIndex = chargeArray.length - 1;
-	updateChargeListPointCharge();
-	document.getElementById("li" + chargeId).className = "liClassShade";
-	if (chargeArray.length == 1) {
-		canvas.onmouseup = mouseUp;
-	    canvas.onmousedown = mouseDown;
-	    canvas.onmousemove = mouseMoved;
-		reDraw();
-	}
-	else {
-		document.getElementById("li" + selectedId).className = "liClassNoShade";
-	}
-	selectedId = chargeId;
-	highestID = chargeId;
-	chargeId++;
-
-	reDraw();
-}
-
-function addPosLineCharge() {
+function addLineCharge(polarityPassedIn) {
 	var byStartEnd = !document.getElementById("addLineChargeStartEnd").disabled;
 	var byAngleLength = !document.getElementById("addLineChargeLengthAngle").disabled;
-	var polarity = 1;
+	if (polarityPassedIn == 1) var polarity = 1;
+	else if (polarityPassedIn == -1) var polarity = -1;
+	else return;
 	if (byStartEnd && byAngleLength) {
 		var chargeDensity = 1;
 		var sXPos = 50;
@@ -489,11 +462,11 @@ function addPosLineCharge() {
 		var sXPos = document.getElementById("startXTextLengthAngle").value;
 		var sYPos = document.getElementById("startYTextLengthAngle").value;
 
-		var eXPos = determineXEndPoint(sXPos, angle, length);
-		var eYPos = determineYEndPoint(sYPos, angle, length);
+		var eXPos = Math.round(determineXEndPoint(sXPos, angle, length));
+		var eYPos = Math.round(determineYEndPoint(sYPos, angle, length));
 	}
 
-	var newCharge = new chargeElement().initLineChargeByStartEnd(sXPos, sYPos, eXPos, eYPos, 1, 0, 0, chargeId);
+	var newCharge = new chargeElement().initLineChargeByStartEnd(sXPos, sYPos, eXPos, eYPos, polarity, 0, 0, chargeId);
 	newCharge.centerX = determineCenter(sXPos, eXPos);
 	newCharge.centerY = determineCenter(sYPos, eYPos);
 
@@ -501,39 +474,6 @@ function addPosLineCharge() {
 		return;
 	}
 
-	newCharge.angle = findAngle(sXPos, eXPos, sYPos, eYPos);
-	newCharge.length = findLength(sXPos, eXPos, sYPos, eYPos);
-	chargeArray.push(newCharge);
-	currentIndex = chargeArray.length - 1;
-	updateChargeListLineCharge();
-	document.getElementById("li" + chargeId).className = "liClassShade";
-	if (chargeArray.length == 1) {
-		canvas.onmouseup = mouseUp;
-	    canvas.onmousedown = mouseDown;
-	    canvas.onmousemove = mouseMoved;
-		reDraw();
-	}
-	else {
-		document.getElementById("li" + selectedId).className = "liClassNoShade";
-	}
-
-	selectedId = chargeId;
-	highestID = chargeId;
-	chargeId++;
-
-	reDraw();
-}
-
-function addNegLineCharge() {
-	var sXPos = 100;
-	var sYPos = 50;
-	var eXPos = 50;
-	var eYPos = 100;
-	var polarity = 1;
-
-	var newCharge = new chargeElement().initLineChargeByStartEnd(sXPos, sYPos, eXPos, eYPos, -1, 0, 0, chargeId);
-	newCharge.centerX = determineCenter(sXPos, eXPos);
-	newCharge.centerY = determineCenter(sYPos, eYPos);
 	newCharge.angle = findAngle(sXPos, eXPos, sYPos, eYPos);
 	newCharge.length = findLength(sXPos, eXPos, sYPos, eYPos);
 	chargeArray.push(newCharge);
@@ -606,18 +546,18 @@ function validateAddLineChargeForm (method) {
 
 function determineCenter (first, second) {
 	var center;
-	if (second > first) center = Math.floor((second - first)/2) + parseInt(first);
-	else center = Math.floor((first - second)/2) + parseInt(second);
+	if (second > first) center = Math.round((second - first)/2) + parseInt(first);
+	else center = Math.round((first - second)/2) + parseInt(second);
 	return center;
 }
 
 function determineXEndPoint (xPos, angle, length) {
-	var xEndPoint = xPos + Math.cos(angle);
+	var xEndPoint = parseInt(xPos) + Math.cos(angle) * length;
 	return xEndPoint;
 }
 
 function determineYEndPoint (yPos, angle, length) {
-	var yEndPoint = yPos - Math.sin(angle);
+	var yEndPoint = parseInt(yPos) - Math.sin(angle) * length;
 	return yEndPoint;
 }
 
@@ -648,23 +588,26 @@ function rotateLine(mouseX, mouseY) {
 	var length;
 	var height;
 	var index = chargeArray.length - 1;
-	if (mouseX == chargeArray[index].centerX) {
-		chargeArray[index].sXPos = chargeArray[index].centerX;
-		chargeArray[index].sYPos = chargeArray[index].centerY + Math.ceil(length/2);
-		chargeArray[index].eXPos = chargeArray[index].centerX;
-		chargeArray[index].eYPos = chargeArray[index].centerY - Math.ceil(length/2);
+	var currentElement = chargeArray[index];
+	if (mouseX == currentElement.centerX) {
+		console.log("oh no!");
+		currentElement.angle = Math.PI/2;
+		currentElement.sXPos = currentElement.centerX;
+		currentElement.sYPos = currentElement.centerY + Math.round(currentElement.length/2);
+		currentElement.eXPos = currentElement.centerX;
+		currentElement.eYPos = currentElement.centerY - Math.round(currentElement.length/2);
 	}
 	else {
-		height = chargeArray[index].centerY - mouseY;
-		length = chargeArray[index].centerX - mouseX;
+		height = currentElement.centerY - mouseY;
+		length = currentElement.centerX - mouseX;
 		angle = Math.atan(height/length);
-		var newAddedXPos = Math.ceil(chargeArray[index].length/2) * Math.cos(-angle);
-		var newAddedYPos = Math.ceil(chargeArray[index].length/2) * Math.sin(-angle);
-		chargeArray[index].angle = angle;
-		chargeArray[index].sXPos = chargeArray[index].centerX + newAddedXPos;
-		chargeArray[index].sYPos = chargeArray[index].centerY - newAddedYPos;
-		chargeArray[index].eXPos = chargeArray[index].centerX - newAddedXPos;
-		chargeArray[index].eYPos = chargeArray[index].centerY + newAddedYPos;
+		var newAddedXPos = (currentElement.length/2) * Math.cos(-angle);
+		var newAddedYPos = (currentElement.length/2) * Math.sin(-angle);
+		currentElement.angle = angle;
+		currentElement.sXPos = Math.round(currentElement.centerX + newAddedXPos);
+		currentElement.sYPos = Math.round(currentElement.centerY - newAddedYPos);
+		currentElement.eXPos = Math.round(currentElement.centerX - newAddedXPos);
+		currentElement.eYPos = Math.round(currentElement.centerY + newAddedYPos);
 	}
 }
 
@@ -762,13 +705,17 @@ function updateChargeListLineCharge() {
 	var colorCodeElement = document.createElement("img");
 	var expandButton = document.createElement("img");
 	var optionsButton = document.createElement("div");
-	var xPosCenterContainer = document.createElement("div");
-	var yPosCenterContainer = document.createElement("div");
+	var startCoordsContainer = document.createElement("div");
+	var startCoordsContainerText = document.createElement("span");
+	var startCoordsContainerInput;
+	var startCoordsContainerXInput = document.createElement("span");
+	var startCoordsContainerYInput = document.createElement("span");
+	var endCoordsContainer = document.createElement("div");
+	var endCoordsContainerText = document.createElement("span");
+	var endCoordsContainerInput;
+	var endCoordsContainerXInput = document.createElement("span");
+	var endCoordsContainerYInput = document.createElement("span");
 	var angleContainer = document.createElement("div");
-	var xPosCenterContainerText = document.createElement("span");
-	var xPosCenterContainerInput = document.createElement("span");
-	var yPosCenterContainerText = document.createElement("span");
-	var yPosCenterContainerInput = document.createElement("span");
 	var angleContainerText = document.createElement("span");
 	var angleContainerInput = document.createElement("span");
 
@@ -788,22 +735,28 @@ function updateChargeListLineCharge() {
 	expandButton.alt = "1";
 	optionsButton.className = "listOptionsButton";
 	optionsButton.id = "ob" + chargeObject.id;
+	
+	startCoordsContainer.className = "listPosContainer";
+	startCoordsContainer.id = "startCoordsCont" + chargeObject.id;
+	startCoordsContainerText.className = "promptStyle";
+	startCoordsContainerText.innerHTML = "START: ";
+	
+	endCoordsContainer.className = "listPosContainer";
+	endCoordsContainer.id = "endCoordsCont" + chargeObject.id;
+	endCoordsContainerText.className = "promptStyle";
+	endCoordsContainerText.innerHTML = "END: ";
+	
+	startCoordsContainerXInput.innerHTML = chargeObject.sXPos;
+	startCoordsContainerXInput.id = "startCoordsX" + chargeObject.id;
+	startCoordsContainerYInput.innerHTML = chargeObject.sYPos;
+	startCoordsContainerYInput.id = "startCoordsY" + chargeObject.id;
+	startCoordsContainerInput = formatCoords(startCoordsContainerXInput, startCoordsContainerYInput);
 
-	xPosCenterContainer.className = "listPosContainer";
-	xPosCenterContainer.id = "xCentPosCont" + chargeObject.id;
-	xPosCenterContainerText.className = "promptStyle";
-	xPosCenterContainerText.innerHTML = "CENTER X: "
-	xPosCenterContainerInput.className = "promptStyle";
-	xPosCenterContainerInput.id = "xCentPos" + chargeObject.id;
-	xPosCenterContainerInput.innerHTML = chargeObject.centerX;
-
-	yPosCenterContainer.className = "listPosContainer";
-	yPosCenterContainer.id = "yCentPosCont" + chargeObject.id;
-	yPosCenterContainerText.className = "promptStyle";
-	yPosCenterContainerText.innerHTML = "CENTER Y: "
-	yPosCenterContainerInput.className = "promptStyle";
-	yPosCenterContainerInput.id = "yCentPos" + chargeObject.id;
-	yPosCenterContainerInput.innerHTML = chargeObject.centerY;
+	endCoordsContainerXInput.innerHTML = chargeObject.eXPos;
+	endCoordsContainerXInput.id = "endCoordsX" + chargeObject.id;
+	endCoordsContainerYInput.innerHTML = chargeObject.eYPos;
+	endCoordsContainerYInput.id = "endCoordsY" + chargeObject.id;
+	endCoordsContainerInput = formatCoords(endCoordsContainerXInput, endCoordsContainerYInput);
 
 	angleContainer.className = "listPosContainer";
 	angleContainer.id = "angleCont" + chargeObject.id;
@@ -811,7 +764,7 @@ function updateChargeListLineCharge() {
 	angleContainerText.innerHTML = "ANGLE: ";
 	angleContainerInput.className = "promptStyle";
 	angleContainerInput.id = "angle" + chargeObject.id;
-	angleContainerInput.innerHTML = chargeObject.angle;
+	angleContainerInput.innerHTML = -(chargeObject.angle).toFixed(3);
 
 	// listElement.style.background = "#EAEAEA"; // COMMENT: setting the background in js overrides the background hover property in css? need to look into topic: "specificity"
 	chargeList.appendChild(listElement);
@@ -826,8 +779,9 @@ function updateChargeListLineCharge() {
 	// stops the click action to propagating to the overall li element and cause currentSelectClick() to run
 	$(optionsButton).click(function(event) {event.stopPropagation()});
 	rightBlock.appendChild(textElement);
-	rightBlock.appendChild(xPosCenterContainer);
-	rightBlock.appendChild(yPosCenterContainer);
+
+	rightBlock.appendChild(startCoordsContainer);
+	rightBlock.appendChild(endCoordsContainer);
 	rightBlock.appendChild(angleContainer);
 	rightBlock.appendChild(optionsButton);
 	rightBlock.appendChild(expandButton);
@@ -835,14 +789,18 @@ function updateChargeListLineCharge() {
 	if (chargeObject.polarity == 1) textElement.innerHTML += chargeObject.pointChargeStrength +" C </br>";
 	else textElement.innerHTML += "-" + chargeObject.pointChargeStrength +" C </br>";
 	textElement.innerHTML += "Line Charge </br>";
-	xPosCenterContainer.appendChild(xPosCenterContainerText);
-	xPosCenterContainer.appendChild(xPosCenterContainerInput);
-	yPosCenterContainer.appendChild(yPosCenterContainerText);
-	yPosCenterContainer.appendChild(yPosCenterContainerInput);
+
+	startCoordsContainer.appendChild(startCoordsContainerText);
+	startCoordsContainer.appendChild(startCoordsContainerInput);
+
+	endCoordsContainer.appendChild(endCoordsContainerText);
+	endCoordsContainer.appendChild(endCoordsContainerInput);
+
 	angleContainer.appendChild(angleContainerText);
 	angleContainer.appendChild(angleContainerInput);
-    $("#xCentPosCont" + chargeObject.id).hide();
-    $("#yCentPosCont" + chargeObject.id).hide();
+
+	$("#startCoordsCont" + chargeObject.id).hide();
+	$("#endCoordsCont" + chargeObject.id).hide();
     $("#angleCont" + chargeObject.id).hide();
     $("#ob" + chargeObject.id).hide();
     $("#eb" + chargeObject.id).toggle(function() { 
@@ -853,6 +811,16 @@ function updateChargeListLineCharge() {
         $(this).prevAll(".listPosContainer").slideUp();
         $(this).prevAll(".listOptionsButton").slideUp();
     });
+}
+
+function formatCoords(xCoord, yCoord) {
+	var temp = document.createElement("span");
+	temp.innerHTML += "(";
+	temp.appendChild(xCoord);
+	temp.innerHTML += ", ";
+	temp.appendChild(yCoord);
+	temp.innerHTML += ")";
+	return temp;
 }
 
 // arrayIndexParameter for when you already know the array index (used in the mouseDown() function)
@@ -957,14 +925,17 @@ function expandButtonListClick(id) {
 	if (expandButton.alt == "1") {
 		expandButton.src = "images/contractPanel.png";
 		arrayIndex = findArrayIndexFromID(id);
-		if (chargeArray[arrayIndex].pointOrLine == 1) {
-			document.getElementById("xPos" + id).innerHTML = chargeArray[arrayIndex].xPos;
-			document.getElementById("yPos" + id).innerHTML = chargeArray[arrayIndex].yPos;			
+		var currentElement = chargeArray[arrayIndex];
+		if (currentElement.pointOrLine == 1) {
+			document.getElementById("xPos" + id).innerHTML = currentElement.xPos;
+			document.getElementById("yPos" + id).innerHTML = currentElement.yPos;			
 		}
 		else {
-			document.getElementById("xCentPos" + id).innerHTML = chargeArray[arrayIndex].centerX;
-			document.getElementById("yCentPos" + id).innerHTML = chargeArray[arrayIndex].centerY;	
-			document.getElementById("angle" + id).innerHTML = chargeArray[arrayIndex].angle;
+			document.getElementById("startCoordsX" + id).innerHTML = currentElement.sXPos;
+			document.getElementById("startCoordsY" + id).innerHTML = currentElement.sYPos;
+			document.getElementById("endCoordsX" + id).innerHTML = currentElement.eXPos;
+			document.getElementById("endCoordsY" + id).innerHTML = currentElement.eYPos;
+			document.getElementById("angle" + id).innerHTML = -(currentElement.angle).toFixed(4);
 		}
 
 	}

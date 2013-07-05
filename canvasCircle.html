@@ -17,8 +17,8 @@
 		<div id="toolsContainer">
 			<div class = "toolInnerContainerLabel">Point Charge</div>
 			<div id = "pointCharge" class= "toolInnerContainer">
-				<div id="addPositive" onclick="addPosPointCharge()" title="Add Positive Point Charge"></div>
-				<div id="addNegative" onclick="addNegPointCharge()" title="Add Negative Point Charge"></div>
+				<div id="addPositive" onclick="addPointCharge(1)" title="Add Positive Point Charge"></div>
+				<div id="addNegative" onclick="addPointCharge(-1)" title="Add Negative Point Charge"></div>
 				<div class="expContainer">
 					<span class="promptStyle">STRENGTH: </span>
 					<input type="text" class="textContainer" id="strengthText">
@@ -35,8 +35,8 @@
 			</div>
 			<div class = "toolInnerContainerLabel">Line Charge</div>
 			<div class = "toolInnerContainer">
-				<div id="addPositive" onclick="addPosLineCharge()" title="Add Positive Line Charge"></div>
-				<div id="addNegative" onclick="addNegLineCharge()" title="Add Negative Line Charge"></div>
+				<div id="addPositive" onclick="addLineCharge(1)" title="Add Positive Line Charge"></div>
+				<div id="addNegative" onclick="addLineCharge(-1)" title="Add Negative Line Charge"></div>
 				<div class="expContainer startEnd lengthAngle">
 					<span class="promptStyle">CHARGE DENSITY: </span>
 					<input type="text" class="textContainer" id="chargeDensityText">
