@@ -4,13 +4,14 @@ function chargeElement() {
 	this.length;
 	this.angle;
 	this.linearChargeDensity;
-	this.chargeResolution;
+	this.lengthPerPoint;
 	this.sXPos;
 	this.sYPos;
 	this.eXPos;
 	this.eYPos;
 	this.centerX;
 	this.centerY;
+	this.simplePCArray;
 
 	this.pointOrLine;
 	this.xPos;
@@ -30,30 +31,39 @@ chargeElement.prototype.initPointCharge = function (xPos, yPos, polarity, pointC
 	return this;
 };
 
-chargeElement.prototype.initLineChargeByAngle = function (sXPos, sYPos, length, angle, polarity, linearChargeDensity, chargeResolution, id) {
+chargeElement.prototype.initLineChargeByAngle = function (sXPos, sYPos, length, angle, polarity, linearChargeDensity, lengthPerPoint, id) {
 	this.sXPos = sXPos;
 	this.sYPos = sYPos;
 	this.length = length;
 	this.angle = angle;
 	this.polarity = polarity;
 	this.linearChargeDensity = linearChargeDensity;
-	this.chargeResolution = chargeResolution;
+	this.lengthPerPoint = lengthPerPoint;
 	this.id = id;
+	this.simplePCArray = new Array();
 
 	this.pointOrLine = -1;
 	return this;
 };
 
-chargeElement.prototype.initLineChargeByStartEnd = function (sXPos, sYPos, eXPos, eYPos, polarity, linearChargeDensity, chargeResolution, id) {
+chargeElement.prototype.initLineChargeByStartEnd = function (sXPos, sYPos, eXPos, eYPos, polarity, linearChargeDensity, lengthPerPoint, id) {
 	this.sXPos = sXPos;
 	this.sYPos = sYPos;
 	this.eXPos = eXPos;
 	this.eYPos = eYPos;
 	this.polarity = polarity;
 	this.linearChargeDensity = linearChargeDensity;
-	this.chargeResolution = chargeResolution;
+	this.lengthPerPoint = lengthPerPoint;
 	this.id = id;
+	this.simplePCArray = new Array();
 
 	this.pointOrLine = -1;
+	return this;
+};
+
+chargeElement.prototype.initSimplePointCharge = function (xPos, yPos, pointChargeStrength) {
+	this.xPos = xPos;
+	this.yPos = yPos;
+	this.pointChargeStrength = pointChargeStrength;
 	return this;
 };
