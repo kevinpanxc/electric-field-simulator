@@ -32,10 +32,10 @@ chargeElement.prototype.initPointCharge = function (xPos, yPos, polarity, pointC
 };
 
 chargeElement.prototype.initLineChargeByAngle = function (sXPos, sYPos, length, angle, polarity, linearChargeDensity, lengthPerPoint, id) {
-	this.sXPos = sXPos;
-	this.sYPos = sYPos;
-	this.length = length;
-	this.angle = angle;
+	this.sXPos = parseFloat(sXPos);
+	this.sYPos = parseFloat(sYPos);
+	this.length = parseFloat(length);
+	this.angle = parseFloat(angle);
 	this.polarity = polarity;
 	this.linearChargeDensity = linearChargeDensity;
 	this.lengthPerPoint = lengthPerPoint;
@@ -47,10 +47,10 @@ chargeElement.prototype.initLineChargeByAngle = function (sXPos, sYPos, length, 
 };
 
 chargeElement.prototype.initLineChargeByStartEnd = function (sXPos, sYPos, eXPos, eYPos, polarity, linearChargeDensity, lengthPerPoint, id) {
-	this.sXPos = sXPos;
-	this.sYPos = sYPos;
-	this.eXPos = eXPos;
-	this.eYPos = eYPos;
+	this.sXPos = parseFloat(sXPos);
+	this.sYPos = parseFloat(sYPos);
+	this.eXPos = parseFloat(eXPos);
+	this.eYPos = parseFloat(eYPos);
 	this.polarity = polarity;
 	this.linearChargeDensity = linearChargeDensity;
 	this.lengthPerPoint = lengthPerPoint;

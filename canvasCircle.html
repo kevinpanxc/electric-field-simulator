@@ -12,7 +12,7 @@
 </head>
 	
 <body onload="init()">
-	<div id = "header">Electric Field Vectors (incomplete)</div>
+	<div id = "header">EFV</div>
 	<div id = "canvasContainer">
 		<div id="toolsContainer">
 			<div class = "toolInnerContainerLabel">Point Charge</div>
@@ -40,6 +40,10 @@
 				<div class="expContainer startEnd lengthAngle">
 					<span class="promptStyle">CHARGE DENSITY: </span>
 					<input type="text" class="textContainer" id="chargeDensityText">
+				</div>
+				<div class="expContainer startEnd lengthAngle">
+					<span class="promptStyle">LENGTH/CHARGE: </span>
+					<input type="text" class="textContainer" id="lengthPerPointText">
 				</div>
 				<div class="expContainer lengthAngle">
 					<span class="promptStyle">START X: </span>
@@ -109,6 +113,20 @@
 	</div>
 <!-- 	<button onclick="drawVectorField()">Draw Field</button>
 	<button onclick="unlock()">Unlock</button> -->
+
+	<script type="text/javascript">
+
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-37350827-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+
+	</script>
 </body>
 
 </html>

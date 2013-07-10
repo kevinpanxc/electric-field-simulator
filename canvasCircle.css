@@ -231,7 +231,7 @@
 	font-size: 14px;
 }
 
-.optionsPopUp {
+.optionsPointChargePopUp {
 	position: absolute;
 	width: 300px;
 	height: 220px;
@@ -239,6 +239,21 @@
 	top: 50%;
 	margin-left: -150px;
 	margin-top: -110px;
+	background-color: #FAFAFA;
+	border: solid #BDBDBD 1px;
+/*	-moz-box-shadow: 0 0 14px #BBB;
+	-webkit-box-shadow: 0 0 14px#BBB;
+	box-shadow: 0 0 14px #BBB;*/
+}
+
+.optionsLineChargePopUp {
+	position: absolute;
+	width: 440px;
+	height: 360px;
+	left: 50%;
+	top: 50%;
+	margin-left: -220px;
+	margin-top: -180px;
 	background-color: #FAFAFA;
 	border: solid #BDBDBD 1px;
 /*	-moz-box-shadow: 0 0 14px #BBB;
@@ -286,6 +301,24 @@
 	text-align: left;
 	width: 145px;
 	height: 110px;
+	padding-left: 5px;
+	vertical-align: top;
+}
+
+.optionsLineChargeLeftContainer {
+	display: inline-block;
+	text-align: right;
+	width: 215px;
+	height: 250px;
+	padding-right: 5px;
+	vertical-align: top;
+}
+
+.optionsLineChargeRightContainer {
+	display: inline-block;
+	text-align: left;
+	width: 215px;
+	height: 250px;
 	padding-left: 5px;
 	vertical-align: top;
 }
