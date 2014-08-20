@@ -1,3 +1,37 @@
+/* ==========================
+   global helper functions... */
+
+function determine_center (first, second) {
+    var center;
+    if (second > first) center = Math.round((second - first)/2) + first;
+    else center = Math.round((first - second)/2) + second;
+    return center;
+}
+
+function find_angle (s_x_pos, e_x_pos, s_y_pos, e_y_pos) {   
+    var angle;
+    var length;
+    var height;
+    if (e_x_pos == s_x_pos) return Math.PI/2;
+    else if (e_y_pos == s_y_pos) return 0;
+    height = e_y_pos - s_y_pos;
+    length = e_x_pos - s_x_pos;
+    angle = Math.atan(height/length); 
+    // if line is / then the angle will definitely be negative
+    // if line is \ then the angle will definitely be positive
+    // angle range will only be from Math.PI/2 to -Math.PI/2
+    return angle;
+}
+
+function find_length(s_x_pos, e_x_pos, s_y_pos, e_y_pos){
+    var x_length = e_x_pos - s_x_pos;
+    var y_length = e_y_pos - s_y_pos;
+    var length = Math.sqrt((x_length * x_length) + (y_length * y_length));
+    return length;
+}
+
+/* ========================== */
+
 function PointCharge () {
     this.charge_strength;
     this.x_pos;
@@ -71,6 +105,9 @@ LineCharge.prototype.initialize_by_points = function (s_x_pos, s_y_pos, e_x_pos,
 }
 
 var UI = (function () {
+    var default_text_box_border_colour;
+    var error_text_box_border_colour = "#FF1414";
+
     function build_coordinates_span(parent_span, x_span, y_span) {
         parent_span.innerHTML += "(";
         parent_span.appendChild(x_span);
@@ -128,7 +165,7 @@ var UI = (function () {
         
         // stops the click action to propagating to the overall li element and cause currentSelectClick() to run
         $(expand_button).click(function(event) {event.stopPropagation()});
-        options_button.setAttribute("onClick", "optionsButtonPointChargeListClick(" +point_charge.id + ")");
+        options_button.setAttribute("onClick", "CanvasField.options_button_for_point_charge_clicked(" +point_charge.id + ")");
         // stops the click action to propagating to the overall li element and cause currentSelectClick() to run
         $(options_button).click(function(event) {event.stopPropagation()});
         right_block.appendChild(text_element);
@@ -318,10 +355,20 @@ var UI = (function () {
         expand_button.alt = -expand_button.alt;
     }
 
-    function update_point_charge_coordinates (point_charge) {
+    function update_point_charge_information (point_charge) {
         if (document.getElementById("eb" + point_charge.id).alt == -1){
             document.getElementById("xPos" + point_charge.id).innerHTML = point_charge.x_pos;
             document.getElementById("yPos" + point_charge.id).innerHTML = point_charge.y_pos;
+        }
+    }
+
+    function update_line_charge_information (line_charge) {
+        if (document.getElementById("eb" + line_charge.id).alt == -1){
+            document.getElementById("startCoordsX" + line_charge.id).innerHTML = line_charge.s_x_pos;
+            document.getElementById("startCoordsY" + line_charge.id).innerHTML = line_charge.s_y_pos;
+            document.getElementById("endCoordsX" + line_charge.id).innerHTML = line_charge.e_x_pos;
+            document.getElementById("endCoordsY" + line_charge.id).innerHTML = line_charge.e_y_pos;
+            document.getElementById("angle" + line_charge.id).innerHTML = -(line_charge.angle).toFixed(4);
         }
     }
 
@@ -500,6 +547,281 @@ var UI = (function () {
         return false;
     }
 
+    function open_point_charge_options_modal (point_charge) {
+        var canvas_container = document.getElementById("canvasContainer");
+        var options_pop_up = create_new_element("div", "popUp", "optionsPointChargePopUp fullScreenDivFade", "");
+        var options_heading_pop_up = create_new_element("div", "", "optionsHeadingPopUp fullScreenDivFade", "OPTIONS");
+        var cross_image = create_new_element("div", "", "crossImage", "");
+        var options_left_container = create_new_element("div", "", "optionsLeftContainer", "");
+        var options_right_container = create_new_element("div", "", "optionsRightContainer", "");
+        var options_bottom_container = create_new_element("div", "", "optionsBottomContainer", "");
+        var options_update_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Update");
+        var options_delete_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Delete");
+        var fullscreen_div = create_new_element("div", "fullScreenDiv", "fullScreenDiv fullScreenDivFade", "");
+
+        var otc_left_1 = create_new_element("div", "", "optionsTextContainer", "X POSITION: ");
+        var otc_left_2 = create_new_element("div", "", "optionsTextContainer", "Y POSITION: ");
+        var otc_left_3 = create_new_element("div", "", "optionsTextContainer", "POLARITY: ");
+
+        var otc_right_1 = create_new_element("div", "", "optionsTextContainer", "");
+        var otc_right_2 = create_new_element("div", "", "optionsTextContainer", "");
+
+        var x_pos_element = create_new_element("input", "optionsXPOS", "", "");
+        var y_pos_element = create_new_element("input", "optionsYPOS", "", "");
+
+        x_pos_element.type = "text";
+        y_pos_element.type = "text";
+
+        x_pos_element.size = 6;
+        y_pos_element.size = 6;
+
+        var polarity_div = document.createElement("div");
+        var polarity_div_image = create_new_element("img", "polarityDivPic", "optionsPosNegSel", "");
+
+        if (point_charge.polarity == 1) {
+            polarity_div_image.src = "images/posCharge.png";
+            polarity_div_image.alt = "1";
+        }
+        else {
+            polarity_div_image.src = "images/negCharge.png";
+            polarity_div_image.alt = "-1";
+        }
+
+        x_pos_element.value = point_charge.x_pos;
+        y_pos_element.value = point_charge.y_pos;
+     
+        canvas_container.appendChild(fullscreen_div);
+        canvas_container.appendChild(options_pop_up);
+        options_pop_up.appendChild(options_heading_pop_up);
+        options_heading_pop_up.appendChild(cross_image);
+        options_pop_up.appendChild(options_left_container);
+        options_pop_up.appendChild(options_right_container);
+        options_pop_up.appendChild(options_bottom_container);
+        options_left_container.appendChild(otc_left_1);
+        options_left_container.appendChild(otc_left_2);
+        options_left_container.appendChild(otc_left_3);
+        options_right_container.appendChild(otc_right_1);
+        otc_right_1.appendChild(x_pos_element);
+        otc_right_2.appendChild(y_pos_element);
+        options_right_container.appendChild(otc_right_2);
+        options_right_container.appendChild(polarity_div);
+        polarity_div.appendChild(polarity_div_image);
+        options_bottom_container.appendChild(options_update_button);
+        options_bottom_container.appendChild(options_delete_button);
+
+        fullscreen_div.setAttribute("onClick", "UI.close_options_pop_up()");
+        cross_image.setAttribute("onClick", "UI.close_options_pop_up()");
+        polarity_div_image.setAttribute("onClick", "UI.change_charge_polarity_image_in_options_modal()");
+        options_update_button.setAttribute("onClick", "CanvasField.update_point_charge()");
+        options_delete_button.setAttribute("onClick", "deleteCharge("+ point_charge.id +")");
+
+        // $("#fullScreenDiv").hover(
+        //  function () {
+        //      $(".fullScreenDivFade").fadeTo(500, 0.3);
+        //  },
+        //  function () {
+        //      $(".fullScreenDivFade").fadeTo(500, 1.0);
+        //  }
+        // );
+
+        default_text_box_border_colour = document.getElementById("optionsXPOS").style.borderColor;
+    }
+
+    function get_input_to_update_point_charge (point_charge) {
+        var x_pos = document.getElementById("optionsXPOS").value;
+        var y_pos = document.getElementById("optionsYPOS").value;
+        var polarity = document.getElementById("polarityDivPic").alt;
+
+        var x_pos_has_error = false;
+        var y_pos_has_error = false;
+
+        if (isNaN(x_pos) || x_pos == "") x_pos_has_error = true;
+        else if (x_pos < 0 || x_pos > 600) x_pos_has_error = true;
+
+        if (isNaN(y_pos) || y_pos == "") y_pos_has_error = true;
+        else if (y_pos < 0 || y_pos > 600) y_pos_has_error = true;
+
+        if (!x_pos_has_error && !y_pos_has_error) {
+            document.getElementById("xPos" + point_charge.id).innerHTML = x_pos;
+            document.getElementById("yPos" + point_charge.id).innerHTML = y_pos;
+
+            if (polarity == "1") {
+                document.getElementById("pcStrength" + point_charge.id).innerHTML = point_charge.charge_strength +" C </br>Point Charge </br>";
+                document.getElementById("colorCodeBar" + point_charge.id).src = "images/posChargeColorCode.png";
+            }
+            else {
+                document.getElementById("pcStrength" + point_charge.id).innerHTML = "-" + point_charge.charge_strength +" C </br>Point Charge </br>";
+                document.getElementById("colorCodeBar" + point_charge.id).src = "images/negChargeColorCode.png";
+            }
+
+            point_charge.x_pos = x_pos;
+            point_charge.y_pos = y_pos;
+            point_charge.polarity = polarity;
+
+            return true;
+        } else {
+            if (x_pos_has_error) {
+                document.getElementById("optionsXPOS").style.borderColor = error_text_box_border_colour;
+            }
+            else {
+                document.getElementById("optionsXPOS").style.borderColor = default_text_box_border_colour;
+            }
+
+            if (y_pos_has_error) {
+                document.getElementById("optionsYPOS").style.borderColor = error_text_box_border_colour;
+            }
+            else {
+                document.getElementById("optionsYPOS").style.borderColor = default_text_box_border_colour;
+            }
+            return false;
+        }   
+    }
+
+    function get_input_to_update_line_charge (line_charge) {
+        var charge_density = document.getElementById("optionsChargeDensity").value;
+        var length_per_point = document.getElementById("optionsLengthPerPoint").value;
+        var s_x_pos = document.getElementById("optionsStartXPos").value;
+        var s_y_pos = document.getElementById("optionsStartYPos").value;
+        var e_x_pos = document.getElementById("optionsEndXPos").value;
+        var e_y_pos = document.getElementById("optionsEndYPos").value;
+        var polarity = document.getElementById("polarityDivPic").alt;
+
+        var new_c_x_pos;
+        var new_c_y_pos;
+
+        var charge_density_has_error = false;
+        var length_per_point_has_error = false;
+        var s_x_pos_has_error = false;
+        var s_y_pos_has_error = false;
+        var e_x_pos_has_error = false;
+        var e_y_pos_has_error = false;
+        var center_has_error = false;
+
+        if (isNaN(charge_density) || charge_density == "") charge_density_has_error = true;
+        else if (charge_density <= 0) charge_density_has_error = true;
+
+        if (isNaN(length_per_point) || length_per_point == "") length_per_point_has_error = true;
+        else if (length_per_point < 1) length_per_point_has_error = true;
+
+        if (isNaN(s_x_pos) || s_x_pos == "") s_x_pos_has_error = true;
+
+        if (isNaN(s_y_pos) || s_y_pos == "") s_y_pos_has_error = true;
+
+        if (isNaN(e_x_pos) || e_x_pos == "") e_x_pos_has_error = true;
+
+        if (isNaN(e_y_pos) || e_y_pos == "") e_y_pos_has_error = true;
+
+        if (!charge_density_has_error && !length_per_point_has_error && !s_x_pos_has_error && !s_y_pos_has_error && !e_x_pos_has_error && !e_y_pos_has_error) {
+
+            s_x_pos = parseFloat(s_x_pos);
+            s_y_pos = parseFloat(s_y_pos);
+            new_c_x_pos = determine_center(s_x_pos, e_x_pos);
+            new_c_y_pos = determine_center(s_y_pos, e_y_pos);
+
+            if (new_c_x_pos < 0 || new_c_x_pos > 600 || new_c_y_pos < 0 || new_c_y_pos > 600){
+                center_has_error = true;
+            }
+
+            if (!center_has_error) {
+                line_charge.linear_charge_density = parseFloat(charge_density);
+
+                if (line_charge.length_per_point != parseFloat(length_per_point)) line_charge.point_charge_array.length = 0;
+
+                line_charge.length_per_point = parseFloat(length_per_point);
+                line_charge.s_x_pos = parseFloat(s_x_pos);
+                line_charge.s_y_pos = parseFloat(s_y_pos);
+                line_charge.e_x_pos = parseFloat(e_x_pos);
+                line_charge.e_y_pos = parseFloat(e_y_pos);
+                line_charge.c_x_pos = parseFloat(new_c_x_pos);
+                line_charge.c_y_pos = parseFloat(new_c_y_pos);
+                line_charge.length = findLength (line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
+                line_charge.angle = findAngle (line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
+                line_charge.polarity = polarity;
+
+                document.getElementById("length" + id).innerHTML = line_charge.length.toFixed(4);
+                document.getElementById("lengthPerPoint" + id).innerHTML = length_per_point;
+                document.getElementById("startCoordsX" + id).innerHTML = s_x_pos;
+                document.getElementById("startCoordsY" + id).innerHTML = s_y_pos;
+                document.getElementById("endCoordsX" + id).innerHTML = e_x_pos;
+                document.getElementById("endCoordsY" + id).innerHTML = e_y_pos;
+
+                if (polarity == "1") {
+                    document.getElementById("lcChargeDensity" + id).innerHTML = line_charge.linear_charge_density +" C/unit </br>Line Charge</br>";
+                    document.getElementById("colorCodeBar" + id).src = "images/posChargeColorCode.png";
+                }
+                else {
+                    document.getElementById("lcChargeDensity" + id).innerHTML = "-" + line_charge.linear_charge_density +" C/unit </br>Line Charge </br>";
+                    document.getElementById("colorCodeBar" + id).src = "images/negChargeColorCode.png";
+                }
+
+                return;
+            }
+        }
+
+        if (charge_density_has_error) {
+            document.getElementById("optionsChargeDensity").style.borderColor = error_text_box_border_colour;
+        }
+        else {
+            document.getElementById("optionsChargeDensity").style.borderColor = default_text_box_border_colour;
+        }
+
+        if (length_per_point_has_error) {
+            document.getElementById("optionsLengthPerPoint").style.borderColor = error_text_box_border_colour;
+        }
+        else {
+            document.getElementById("optionsLengthPerPoint").style.borderColor = default_text_box_border_colour;
+        }
+
+        if (s_x_pos_has_error || center_has_error) {
+            document.getElementById("optionsStartXPos").style.borderColor = error_text_box_border_colour;
+        }
+        else {
+            document.getElementById("optionsStartXPos").style.borderColor = default_text_box_border_colour;
+        }
+
+        if (s_y_pos_has_error || center_has_error) {
+            document.getElementById("optionsStartYPos").style.borderColor = error_text_box_border_colour;
+        }
+        else {
+            document.getElementById("optionsStartYPos").style.borderColor = default_text_box_border_colour;
+        }
+
+        if (e_x_pos_has_error || center_has_error) {
+            document.getElementById("optionsEndXPos").style.borderColor = error_text_box_border_colour;
+        }
+        else {
+            document.getElementById("optionsEndXPos").style.borderColor = default_text_box_border_colour;
+        }
+
+        if (e_y_pos_has_error || center_has_error) {
+            document.getElementById("optionsEndYPos").style.borderColor = error_text_box_border_colour;
+        }
+        else {
+            document.getElementById("optionsEndYPos").style.borderColor = default_text_box_border_colour;
+        }
+    }
+
+    function change_charge_polarity_image_in_options_modal () {
+        var polarity_div_image = document.getElementById("polarityDivPic");
+        polarity_div_image.alt = -polarity_div_image.alt;
+        if (polarity_div_image.alt == "-1") polarity_div_image.src = "images/negCharge.png";
+        else polarity_div_image.src = "images/posCharge.png";
+    }
+
+    function close_options_pop_up () {
+        var canvasContainer = document.getElementById("canvasContainer");
+        canvasContainer.removeChild(document.getElementById("fullScreenDiv"));
+        canvasContainer.removeChild(document.getElementById("popUp"));
+    }
+
+    function create_new_element (type, id, className, text){
+        var temp = document.createElement(type);
+        temp.id = id;
+        temp.className = className;
+        temp.innerHTML = text;
+        return temp;
+    }
+
     return {
         initialize : function () {
             $(".probeInfoContainer").hide();
@@ -511,11 +833,15 @@ var UI = (function () {
 
         get_input_to_add_line_charge : get_input_to_add_line_charge,
 
+        get_input_to_add_point_charge : get_input_to_add_point_charge,
+
+        get_input_to_update_point_charge : get_input_to_update_point_charge,
+
         update_element_list_shading : update_element_list_shading,
 
-        update_point_charge_coordinates : update_point_charge_coordinates,
+        update_point_charge_information : update_point_charge_information,
 
-        get_input_to_add_point_charge : get_input_to_add_point_charge,
+        update_line_charge_information : update_line_charge_information,
 
         expand_list_element : expand_list_element,
 
@@ -523,7 +849,13 @@ var UI = (function () {
 
         hide_probe_container : hide_probe_container,
 
-        get_input_to_probe_field : get_input_to_probe_field
+        get_input_to_probe_field : get_input_to_probe_field,
+
+        open_point_charge_options_modal : open_point_charge_options_modal,
+
+        close_options_pop_up : close_options_pop_up,
+
+        change_charge_polarity_image_in_options_modal : change_charge_polarity_image_in_options_modal
     }
 })();
 
@@ -770,7 +1102,7 @@ var CanvasField = (function () {
                 current_element.x_pos = new_x_position;
                 current_element.y_pos = new_y_position;
 
-                UI.update_point_charge_coordinates(current_element);
+                UI.update_point_charge_information(current_element);
             }
             else {
                 var id = current_element.id;
@@ -793,13 +1125,8 @@ var CanvasField = (function () {
                         current_pc_array[i].y_pos += y_diff;
                     }
                 }
-                if (document.getElementById("eb" + id).alt == -1){
-                    document.getElementById("startCoordsX" + id).innerHTML = current_element.s_x_pos;
-                    document.getElementById("startCoordsY" + id).innerHTML = current_element.s_y_pos;
-                    document.getElementById("endCoordsX" + id).innerHTML = current_element.e_x_pos;
-                    document.getElementById("endCoordsY" + id).innerHTML = current_element.e_y_pos;
-                    document.getElementById("angle" + id).innerHTML = -(current_element.angle).toFixed(4);
-                } 
+
+                UI.update_line_charge_information(current_element);
             }
         }
         else {
@@ -1124,6 +1451,36 @@ var CanvasField = (function () {
         }
     }
 
+    function options_button_for_point_charge_clicked (id) {
+        select_charge_element(id, -1);
+
+        var array_index = find_array_index_from_id(id);
+        var point_charge = charge_array[array_index];
+        UI.open_point_charge_options_modal(point_charge);
+
+        canvas.onmouseup = null;
+        canvas.onmousedown = null;
+        canvas.onmousemove = null;
+        clearInterval(interval_id);
+    }
+
+    function update_point_charge () {
+        var point_charge = charge_array[charge_array.length - 1];
+        var user_input = UI.get_input_to_update_point_charge(point_charge);
+        if (!user_input) return;
+        UI.close_options_pop_up();
+        re_draw();    
+    }
+
+    function update_line_charge () {
+        var line_charge = charge_array[charge_array.length - 1];
+        var user_input = UI.get_input_to_update_point_charge(line_charge);
+        if (!user_input) return;
+        partition_line_charge(line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
+        UI.close_options_pop_up();
+        re_draw();
+    }
+
     function find_array_index_from_id (id) {
         for (var i = 0; i < charge_array.length; i++){
             if (charge_array[i].id == id) return i;
@@ -1133,35 +1490,6 @@ var CanvasField = (function () {
 
     function get_charge_element_from_id (id) {
         return charge_array[find_array_index_from_id(id)];
-    }
-
-    function find_angle (s_x_pos, e_x_pos, s_y_pos, e_y_pos) {   
-        var angle;
-        var length;
-        var height;
-        if (e_x_pos == s_x_pos) return Math.PI/2;
-        else if (e_y_pos == s_y_pos) return 0;
-        height = e_y_pos - s_y_pos;
-        length = e_x_pos - s_x_pos;
-        angle = Math.atan(height/length); 
-        // if line is / then the angle will definitely be negative
-        // if line is \ then the angle will definitely be positive
-        // angle range will only be from Math.PI/2 to -Math.PI/2
-        return angle;
-    }
-
-    function find_length(s_x_pos, e_x_pos, s_y_pos, e_y_pos){
-        var x_length = e_x_pos - s_x_pos;
-        var y_length = e_y_pos - s_y_pos;
-        var length = Math.sqrt((x_length * x_length) + (y_length * y_length));
-        return length;
-    }
-
-    function determine_center (first, second) {
-        var center;
-        if (second > first) center = Math.round((second - first)/2) + first;
-        else center = Math.round((first - second)/2) + second;
-        return center;
     }
 
     return {
@@ -1188,10 +1516,16 @@ var CanvasField = (function () {
 
         add_line_charge : add_line_charge,
 
+        update_point_charge : update_point_charge,
+
+        update_line_charge : update_line_charge,
+
         select_charge_element : select_charge_element,
 
         get_charge_element_from_id : get_charge_element_from_id,
 
-        toggle_probe_mode_and_probe_location : toggle_probe_mode_and_probe_location
+        toggle_probe_mode_and_probe_location : toggle_probe_mode_and_probe_location,
+
+        options_button_for_point_charge_clicked : options_button_for_point_charge_clicked
     }
 })();
