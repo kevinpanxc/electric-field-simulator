@@ -1031,49 +1031,49 @@ function probe() {
 }
 
 function strengthAngleSet(xProbe, yProbe) {
-    	var dProbe;
-    	var sProbe = 0;
-    	var xResult = 0;
-    	var yResult = 0;
-    	var strengthResult;
-    	var angleResult;
-		var probeMagnitude = document.getElementById("probeMagnitude");
-	    var probeAngle = document.getElementById("probeAngle");
-    	for (var i = 0; i < chargeArray.length; i++){
-    		dProbe = (chargeArray[i].xPos - xProbe) * (chargeArray[i].xPos - xProbe) + (chargeArray[i].yPos - yProbe) * (chargeArray[i].yPos - yProbe);
-    		dProbe = dProbe / 1000000;
-			if (xProbe - chargeArray[i].xPos > -0.01 && xProbe - chargeArray[i].xPos < 0.01){
-				sProbe = Math.PI/2;
-				if (yProbe - chargeArray[i].yPos < 0){
-					sProbe = -sProbe;
-				}
+	var dProbe;
+	var sProbe = 0;
+	var xResult = 0;
+	var yResult = 0;
+	var strengthResult;
+	var angleResult;
+	var probeMagnitude = document.getElementById("probeMagnitude");
+    var probeAngle = document.getElementById("probeAngle");
+	for (var i = 0; i < chargeArray.length; i++){
+		dProbe = (chargeArray[i].xPos - xProbe) * (chargeArray[i].xPos - xProbe) + (chargeArray[i].yPos - yProbe) * (chargeArray[i].yPos - yProbe);
+		dProbe = dProbe / 1000000;
+		if (xProbe - chargeArray[i].xPos > -0.01 && xProbe - chargeArray[i].xPos < 0.01){
+			sProbe = Math.PI/2;
+			if (yProbe - chargeArray[i].yPos < 0){
+				sProbe = -sProbe;
 			}
-			else {
-				sProbe = (yProbe - chargeArray[i].yPos)/(xProbe - chargeArray[i].xPos);
-				sProbe = slopeToRad(sProbe);
-				if ((yProbe - chargeArray[i].yPos > 0 && sProbe < 0) || (yProbe - chargeArray[i].yPos < 0 && sProbe > 0)) {
-					sProbe = Math.PI + sProbe;
-				}
+		}
+		else {
+			sProbe = (yProbe - chargeArray[i].yPos)/(xProbe - chargeArray[i].xPos);
+			sProbe = slopeToRad(sProbe);
+			if ((yProbe - chargeArray[i].yPos > 0 && sProbe < 0) || (yProbe - chargeArray[i].yPos < 0 && sProbe > 0)) {
+				sProbe = Math.PI + sProbe;
 			}
-			if (chargeArray[i].polarity == -1) sProbe = sProbe + Math.PI;
-			if (sProbe > 2 * Math.PI) sProbe = sProbe - 2 * Math.PI;
-			xResult += (Math.cos(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
-			yResult += (Math.sin(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
-    	}
-    	yResult = -yResult;
-    	if (xResult > -0.01 && xResult < 0.01) {
-    		sProbe = Math.PI/2;
-    		if (yResult < 0) sProbe = -sProbe;
-    	}
-    	else {
-    		sProbe = yResult/xResult;
-    		sProbe = slopeToRad(sProbe);
-			if ((yResult > 0 && sProbe < 0) || (yResult < 0 && sProbe > 0)) sProbe = Math.PI + sProbe;
-    	}
-    	// sProbe = 2 * Math.PI - sProbe;
-    	if (sProbe > 2 * Math.PI) sProbe = sProbe - 2 * Math.PI;
-    	probeMagnitude.innerHTML = "STRENGTH: " + parseFloat(Math.sqrt(xResult * xResult + yResult * yResult)).toFixed(3);
-    	probeAngle.innerHTML = "ANGLE: " + parseFloat(sProbe).toFixed(3);
+		}
+		if (chargeArray[i].polarity == -1) sProbe = sProbe + Math.PI;
+		if (sProbe > 2 * Math.PI) sProbe = sProbe - 2 * Math.PI;
+		xResult += (Math.cos(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
+		yResult += (Math.sin(sProbe) * chargeArray[i].pointChargeStrength/dProbe);
+	}
+	yResult = -yResult;
+	if (xResult > -0.01 && xResult < 0.01) {
+		sProbe = Math.PI/2;
+		if (yResult < 0) sProbe = -sProbe;
+	}
+	else {
+		sProbe = yResult/xResult;
+		sProbe = slopeToRad(sProbe);
+		if ((yResult > 0 && sProbe < 0) || (yResult < 0 && sProbe > 0)) sProbe = Math.PI + sProbe;
+	}
+	// sProbe = 2 * Math.PI - sProbe;
+	if (sProbe > 2 * Math.PI) sProbe = sProbe - 2 * Math.PI;
+	probeMagnitude.innerHTML = "STRENGTH: " + parseFloat(Math.sqrt(xResult * xResult + yResult * yResult)).toFixed(3);
+	probeAngle.innerHTML = "ANGLE: " + parseFloat(sProbe).toFixed(3);
 }
 
 function updateScale() {

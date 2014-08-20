@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="canvasCircle.css"/>
+	<script type="text/javascript" src="jquery-1.8.3.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript" src="slidingButtons.js"></script>
+	<link href="http://fonts.googleapis.com/css?family=Open+Sans|Lato" rel="stylesheet" type="text/css">
+</head>
+	
+<body onload="UI.initialize(); CanvasField.initialize()">
+	<div id = "header">EFV</div>
+	<div id = "canvasContainer">
+<div id="toolsContainer">
+			<div class = "toolInnerContainerLabel">Point Charge</div>
+			<div id = "pointCharge" class= "toolInnerContainer">
+				<div id="addPositive" onclick="CanvasField.add_point_charge(1)" title="Add Positive Point Charge"></div>
+				<div id="addNegative" onclick="CanvasField.add_point_charge(-1)" title="Add Negative Point Charge"></div>
+				<div class="expContainer">
+					<span class="promptStyle">STRENGTH: </span>
+					<input type="text" class="textContainer" id="strengthText">
+				</div>
+				<div class="expContainer">
+					<span class="promptStyle">X POSITION: </span>
+					<input type="text" class="textContainer" id="xPosText">
+				</div>
+				<div class="expContainer">			
+					<span class="promptStyle">Y POSITION: </span>
+					<input type="text" class="textContainer" id="yPosText">
+				</div>
+				<button class="expandable">options</button>
+			</div>
+			<div class = "toolInnerContainerLabel">Line Charge</div>
+			<div class = "toolInnerContainer">
+				<div id="addPositive" onclick="CanvasField.add_line_charge(1)" title="Add Positive Line Charge"></div>
+				<div id="addNegative" onclick="CanvasField.add_line_charge(-1)" title="Add Negative Line Charge"></div>
+				<div class="expContainer startEnd lengthAngle">
+					<span class="promptStyle">CHARGE DENSITY: </span>
+					<input type="text" class="textContainer" id="chargeDensityText">
+				</div>
+				<div class="expContainer startEnd lengthAngle">
+					<span class="promptStyle">LENGTH/CHARGE: </span>
+					<input type="text" class="textContainer" id="lengthPerPointText">
+				</div>
+				<div class="expContainer lengthAngle">
+					<span class="promptStyle">START X: </span>
+					<input type="text" class="textContainer" id="startXTextLengthAngle">
+				</div>
+				<div class="expContainer lengthAngle">
+					<span class="promptStyle">START Y: </span>
+					<input type="text" class="textContainer" id="startYTextLengthAngle">
+				</div>
+				<div class="expContainer lengthAngle">
+					<span class="promptStyle">ANGLE (RAD): </span>
+					<input type="text" class="textContainer" id="angleText">
+				</div>
+				<div class="expContainer lengthAngle">
+					<span class="promptStyle">LENGTH: </span>
+					<input type="text" class="textContainer" id="lengthText">
+				</div>
+				<div class="expContainer startEnd">
+					<span class="promptStyle">START X: </span>
+					<input type="text" class="textContainer" id="startXTextStartEnd">
+				</div>
+				<div class="expContainer startEnd">			
+					<span class="promptStyle">START Y: </span>
+					<input type="text" class="textContainer" id="startYTextStartEnd">
+				</div>
+				<div class="expContainer startEnd">
+					<span class="promptStyle">END X: </span>
+					<input type="text" class="textContainer" id="endXText">
+				</div>
+				<div class="expContainer startEnd">			
+					<span class="promptStyle">END Y: </span>
+					<input type="text" class="textContainer" id="endYText">
+				</div>
+				<button class="expandableInline" id="addLineChargeStartEnd">start-end</button>
+				<button class="expandableInline" id="addLineChargeLengthAngle">length-angle</button>
+			</div>
+			<div class = "toolInnerContainer">
+				<div id="probeButton" onclick="CanvasField.toggle_probe_mode_and_probe_location()" title="Test Electric Field Strength"></div>
+				<div class="probeInfoContainer">
+					<div id="probeMagnitude" class = "promptStyle"></div>
+					<div id="probeAngle" class = "promptStyle"></div>
+				</div>
+				<div id="probeXPos" class = "expContainer">
+					<span class="promptStyle">X POSITION: </span>
+					<input type="text" class="textContainer" id="probeXText">
+				</div>
+				<div id="probeYPos" class = "expContainer">
+					<span class="promptStyle">Y POSITION: </span>
+					<input type="text" class="textContainer" id="probeYText">
+				</div>
+				<button class="expandable">options</button>
+			</div>
+<!-- 			<div class = "toolInnerContainer">
+				<div class = "scaleContainer">
+					<span class="promptStyle">SCALE: </span>
+					<input type="text" class="textContainer" id="scaleText">
+					<span class="promptStyle">m </span>
+				</div>
+				<button class="expandable" onclick="updateScale()">update</button>
+			</div> -->
+		</div>
+		<div id = "chargeList">
+			<div id="titleChargeList">ELEMENTS LIST</div>
+			<img src="images/blueThickLine.png" id="chargeListBlueLine"/>
+		</div>
+		<canvas id="canvas" width="600" height="600"></canvas>
+	</div>
+</body>
+
+</html>
