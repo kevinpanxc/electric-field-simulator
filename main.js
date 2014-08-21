@@ -111,6 +111,7 @@ var UI = (function () {
     // main ui elements
     var canvas_container;
     var charge_list;
+    var fullscreen_div;
 
     // probe ui elements
     var probe_button;
@@ -137,6 +138,22 @@ var UI = (function () {
     var s_y_pos_element_for_strength_angle;
     var add_line_charge_by_start_end_button;
     var add_line_charge_by_length_and_angle_button;
+
+    // update point charge modal
+    var polarity_div_image_point_charge_modal;
+    var options_delete_button_point_charge_modal;
+    var options_x_pos_element;
+    var options_y_pos_element;
+
+    // update line charge modal
+    var polarity_div_image_line_charge_modal;
+    var options_delete_button_line_charge_modal;
+    var options_linear_charge_density_element;
+    var options_length_per_point_element;
+    var options_s_x_pos_element;
+    var options_s_y_pos_element;
+    var options_e_x_pos_element;
+    var options_e_y_pos_element;
 
     function build_coordinates_span(parent_span, x_span, y_span) {
         parent_span.innerHTML += "(";
@@ -560,71 +577,20 @@ var UI = (function () {
     }
 
     function open_point_charge_options_modal (point_charge) {
-        var options_pop_up = create_new_element("div", "popUp", "optionsPointChargePopUp fullScreenDivFade", "");
-        var options_heading_pop_up = create_new_element("div", "", "optionsHeadingPopUp fullScreenDivFade", "OPTIONS");
-        var cross_image = create_new_element("div", "", "crossImage", "");
-        var options_left_container = create_new_element("div", "", "optionsLeftContainer", "");
-        var options_right_container = create_new_element("div", "", "optionsRightContainer", "");
-        var options_bottom_container = create_new_element("div", "", "optionsBottomContainer", "");
-        var options_update_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Update");
-        var options_delete_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Delete");
-        var fullscreen_div = create_new_element("div", "fullScreenDiv", "fullScreenDiv fullScreenDivFade", "");
-
-        var otc_left_1 = create_new_element("div", "", "optionsTextContainer", "X POSITION: ");
-        var otc_left_2 = create_new_element("div", "", "optionsTextContainer", "Y POSITION: ");
-        var otc_left_3 = create_new_element("div", "", "optionsTextContainer", "POLARITY: ");
-
-        var otc_right_1 = create_new_element("div", "", "optionsTextContainer", "");
-        var otc_right_2 = create_new_element("div", "", "optionsTextContainer", "");
-
-        var x_pos_element = create_new_element("input", "optionsXPOS", "", "");
-        var y_pos_element = create_new_element("input", "optionsYPOS", "", "");
-
-        x_pos_element.type = "text";
-        y_pos_element.type = "text";
-
-        x_pos_element.size = 6;
-        y_pos_element.size = 6;
-
-        var polarity_div = document.createElement("div");
-        var polarity_div_image = create_new_element("img", "polarityDivPic", "optionsPosNegSel", "");
-
         if (point_charge.polarity == 1) {
-            polarity_div_image.src = "images/posCharge.png";
-            polarity_div_image.alt = "1";
+            polarity_div_image_point_charge_modal.src = "images/posCharge.png";
+            polarity_div_image_point_charge_modal.alt = "1";
         }
         else {
-            polarity_div_image.src = "images/negCharge.png";
-            polarity_div_image.alt = "-1";
+            polarity_div_image_point_charge_modal.src = "images/negCharge.png";
+            polarity_div_image_point_charge_modal.alt = "-1";
         }
 
-        x_pos_element.value = point_charge.x_pos;
-        y_pos_element.value = point_charge.y_pos;
+        options_x_pos_element.value = point_charge.x_pos;
+        options_y_pos_element.value = point_charge.y_pos;
      
-        canvas_container.appendChild(fullscreen_div);
-        canvas_container.appendChild(options_pop_up);
-        options_pop_up.appendChild(options_heading_pop_up);
-        options_heading_pop_up.appendChild(cross_image);
-        options_pop_up.appendChild(options_left_container);
-        options_pop_up.appendChild(options_right_container);
-        options_pop_up.appendChild(options_bottom_container);
-        options_left_container.appendChild(otc_left_1);
-        options_left_container.appendChild(otc_left_2);
-        options_left_container.appendChild(otc_left_3);
-        options_right_container.appendChild(otc_right_1);
-        otc_right_1.appendChild(x_pos_element);
-        otc_right_2.appendChild(y_pos_element);
-        options_right_container.appendChild(otc_right_2);
-        options_right_container.appendChild(polarity_div);
-        polarity_div.appendChild(polarity_div_image);
-        options_bottom_container.appendChild(options_update_button);
-        options_bottom_container.appendChild(options_delete_button);
-
-        fullscreen_div.setAttribute("onClick", "UI.close_options_pop_up()");
-        cross_image.setAttribute("onClick", "UI.close_options_pop_up()");
-        polarity_div_image.setAttribute("onClick", "UI.change_charge_polarity_image_in_options_modal()");
-        options_update_button.setAttribute("onClick", "CanvasField.update_point_charge()");
-        options_delete_button.setAttribute("onClick", "CanvasField.delete_charge_element("+ point_charge.id +")");
+        fullscreen_div.style.display = "block";
+        options_delete_button_point_charge_modal.setAttribute("onClick", "CanvasField.delete_charge_element("+ point_charge.id +")");
 
         // $("#fullScreenDiv").hover(
         //  function () {
@@ -634,112 +600,29 @@ var UI = (function () {
         //      $(".fullScreenDivFade").fadeTo(500, 1.0);
         //  }
         // );
-
+        $(".optionsPointChargePopUp").show();
         default_text_box_border_colour = document.getElementById("optionsXPOS").style.borderColor;
     }
 
     function open_line_charge_options_modal (line_charge) {
-        var options_pop_up = create_new_element("div", "popUp", "optionsLineChargePopUp fullScreenDivFade", "");
-        var options_heading_pop_up = create_new_element("div", "", "optionsHeadingPopUp fullScreenDivFade", "OPTIONS");
-        var cross_image = create_new_element("div", "", "crossImage", "");
-        var options_left_container = create_new_element("div", "", "optionsLineChargeLeftContainer", "");
-        var options_right_container = create_new_element("div", "", "optionsLineChargeRightContainer", "");
-        var options_bottom_container = create_new_element("div", "", "optionsBottomContainer", "");
-        var options_update_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Update");
-        var options_delete_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Delete");
-        var fullscreen_div = create_new_element("div", "fullScreenDiv", "fullScreenDiv fullScreenDivFade", "");
-
-        var otc_left_1 = create_new_element("div", "", "optionsTextContainer", "CHARGE DENSITY: ");
-        var otc_left_2 = create_new_element("div", "", "optionsTextContainer", "LENGTH PER CHARGE: ");
-        var otc_left_3 = create_new_element("div", "", "optionsTextContainer", "START X: ");
-        var otc_left_4 = create_new_element("div", "", "optionsTextContainer", "START Y: ");
-        var otc_left_5 = create_new_element("div", "", "optionsTextContainer", "END X: ");
-        var otc_left_6 = create_new_element("div", "", "optionsTextContainer", "END Y: ");
-        var otc_left_7 = create_new_element("div", "", "optionsTextContainer", "POLARITY: ");
-
-        var otc_right_1 = create_new_element("div", "", "optionsTextContainer", "");
-        var otc_right_2 = create_new_element("div", "", "optionsTextContainer", "");
-        var otc_right_3 = create_new_element("div", "", "optionsTextContainer", "");
-        var otc_right_4 = create_new_element("div", "", "optionsTextContainer", "");
-        var otc_right_5 = create_new_element("div", "", "optionsTextContainer", "");
-        var otc_right_6 = create_new_element("div", "", "optionsTextContainer", "");
-
-        var input_1 = create_new_element("input", "optionsChargeDensity", "", "");
-        var input_2 = create_new_element("input", "optionsLengthPerPoint", "", "");
-        var input_3 = create_new_element("input", "optionsStartXPos", "", "");
-        var input_4 = create_new_element("input", "optionsStartYPos", "", "");
-        var input_5 = create_new_element("input", "optionsEndXPos", "", "");
-        var input_6 = create_new_element("input", "optionsEndYPos", "", "");
-
-        input_1.type = "text";
-        input_2.type = "text";
-        input_3.type = "text";
-        input_4.type = "text";
-        input_5.type = "text";
-        input_6.type = "text";
-
-        input_1.size = 6;
-        input_2.size = 6;
-        input_3.size = 6;
-        input_4.size = 6;
-        input_5.size = 6;
-        input_6.size = 6;
-
-        var polarity_div = document.createElement("div");
-        var polarity_div_image = create_new_element("img", "polarityDivPic", "optionsPosNegSel", "");
-
         if (line_charge.polarity == 1) {
-            polarity_div_image.src = "images/posCharge.png";
-            polarity_div_image.alt = "1";
+            polarity_div_image_line_charge_modal.src = "images/posCharge.png";
+            polarity_div_image_line_charge_modal.alt = "1";
         }
         else {
-            polarity_div_image.src = "images/negCharge.png";
-            polarity_div_image.alt = "-1";
+            polarity_div_image_line_charge_modal.src = "images/negCharge.png";
+            polarity_div_image_line_charge_modal.alt = "-1";
         }
 
-        input_1.value = line_charge.linear_charge_density;
-        input_2.value = line_charge.length_per_point;
-        input_3.value = line_charge.s_x_pos;
-        input_4.value = line_charge.s_y_pos;
-        input_5.value = line_charge.e_x_pos;
-        input_6.value = line_charge.e_y_pos;
+        options_linear_charge_density_element.value = line_charge.linear_charge_density;
+        options_length_per_point_element.value = line_charge.length_per_point;
+        options_s_x_pos_element.value = line_charge.s_x_pos;
+        options_s_y_pos_element.value = line_charge.s_y_pos;
+        options_e_x_pos_element.value = line_charge.e_x_pos;
+        options_e_y_pos_element.value = line_charge.e_y_pos;
      
-        canvas_container.appendChild(fullscreen_div);
-        canvas_container.appendChild(options_pop_up);
-        options_pop_up.appendChild(options_heading_pop_up);
-        options_heading_pop_up.appendChild(cross_image);
-        options_pop_up.appendChild(options_left_container);
-        options_pop_up.appendChild(options_right_container);
-        options_pop_up.appendChild(options_bottom_container);
-        options_left_container.appendChild(otc_left_1);
-        options_left_container.appendChild(otc_left_2);
-        options_left_container.appendChild(otc_left_3);
-        options_left_container.appendChild(otc_left_4);
-        options_left_container.appendChild(otc_left_5);
-        options_left_container.appendChild(otc_left_6);
-        options_left_container.appendChild(otc_left_7);
-        options_right_container.appendChild(otc_right_1);
-        options_right_container.appendChild(otc_right_2);
-        options_right_container.appendChild(otc_right_3);
-        options_right_container.appendChild(otc_right_4);
-        options_right_container.appendChild(otc_right_5);
-        options_right_container.appendChild(otc_right_6);
-        otc_right_1.appendChild(input_1);
-        otc_right_2.appendChild(input_2);
-        otc_right_3.appendChild(input_3);
-        otc_right_4.appendChild(input_4);
-        otc_right_5.appendChild(input_5);
-        otc_right_6.appendChild(input_6);
-        options_right_container.appendChild(polarity_div);
-        polarity_div.appendChild(polarity_div_image);
-        options_bottom_container.appendChild(options_update_button);
-        options_bottom_container.appendChild(options_delete_button);
-
-        fullscreen_div.setAttribute("onClick", "UI.close_options_pop_up()");
-        cross_image.setAttribute("onClick", "UI.close_options_pop_up()");
-        polarity_div_image.setAttribute("onClick", "UI.change_charge_polarity_image_in_options_modal()");
-        options_update_button.setAttribute("onClick", "CanvasField.update_line_charge()");
-        options_delete_button.setAttribute("onClick", "CanvasField.delete_charge_element("+ line_charge.id +")");
+        fullscreen_div.style.display = "block";
+        options_delete_button_line_charge_modal.setAttribute("onClick", "CanvasField.delete_charge_element("+ line_charge.id +")");
 
         // $("#fullScreenDiv").hover(
         //  function () {
@@ -749,14 +632,14 @@ var UI = (function () {
         //      $(".fullScreenDivFade").fadeTo(500, 1.0);
         //  }
         // );
-
+        $(".optionsLineChargePopUp").show();
         default_text_box_border_colour = document.getElementById("optionsChargeDensity").style.borderColor;   
     }
 
     function get_input_to_update_point_charge (point_charge) {
-        var x_pos = document.getElementById("optionsXPOS").value;
-        var y_pos = document.getElementById("optionsYPOS").value;
-        var polarity = document.getElementById("polarityDivPic").alt;
+        var x_pos = options_x_pos_element.value;
+        var y_pos = options_y_pos_element.value;
+        var polarity = polarity_div_image_point_charge_modal.alt;
 
         var x_pos_has_error = false;
         var y_pos_has_error = false;
@@ -787,30 +670,30 @@ var UI = (function () {
             return true;
         } else {
             if (x_pos_has_error) {
-                document.getElementById("optionsXPOS").style.borderColor = error_text_box_border_colour;
+                options_x_pos_element.style.borderColor = error_text_box_border_colour;
             }
             else {
-                document.getElementById("optionsXPOS").style.borderColor = default_text_box_border_colour;
+                options_x_pos_element.style.borderColor = default_text_box_border_colour;
             }
 
             if (y_pos_has_error) {
-                document.getElementById("optionsYPOS").style.borderColor = error_text_box_border_colour;
+                options_y_pos_element.style.borderColor = error_text_box_border_colour;
             }
             else {
-                document.getElementById("optionsYPOS").style.borderColor = default_text_box_border_colour;
+                options_y_pos_element.style.borderColor = default_text_box_border_colour;
             }
             return false;
         }   
     }
 
     function get_input_to_update_line_charge (line_charge) {
-        var charge_density = document.getElementById("optionsChargeDensity").value;
-        var length_per_point = document.getElementById("optionsLengthPerPoint").value;
-        var s_x_pos = document.getElementById("optionsStartXPos").value;
-        var s_y_pos = document.getElementById("optionsStartYPos").value;
-        var e_x_pos = document.getElementById("optionsEndXPos").value;
-        var e_y_pos = document.getElementById("optionsEndYPos").value;
-        var polarity = document.getElementById("polarityDivPic").alt;
+        var charge_density = options_linear_charge_density_element.value;
+        var length_per_point = options_length_per_point_element.value;
+        var s_x_pos = options_s_x_pos_element.value;
+        var s_y_pos = options_s_y_pos_element.value;
+        var e_x_pos = options_e_x_pos_element.value;
+        var e_y_pos = options_e_y_pos_element.value;
+        var polarity = polarity_div_image_line_charge_modal.alt;
 
         var new_c_x_pos;
         var new_c_y_pos;
@@ -885,61 +768,73 @@ var UI = (function () {
         }
 
         if (charge_density_has_error) {
-            document.getElementById("optionsChargeDensity").style.borderColor = error_text_box_border_colour;
+            options_linear_charge_density_element.style.borderColor = error_text_box_border_colour;
         }
         else {
-            document.getElementById("optionsChargeDensity").style.borderColor = default_text_box_border_colour;
+            options_linear_charge_density_element.style.borderColor = default_text_box_border_colour;
         }
 
         if (length_per_point_has_error) {
-            document.getElementById("optionsLengthPerPoint").style.borderColor = error_text_box_border_colour;
+            options_length_per_point_element.style.borderColor = error_text_box_border_colour;
         }
         else {
-            document.getElementById("optionsLengthPerPoint").style.borderColor = default_text_box_border_colour;
+            options_length_per_point_element.style.borderColor = default_text_box_border_colour;
         }
 
         if (s_x_pos_has_error || center_has_error) {
-            document.getElementById("optionsStartXPos").style.borderColor = error_text_box_border_colour;
+            options_s_x_pos_element.style.borderColor = error_text_box_border_colour;
         }
         else {
-            document.getElementById("optionsStartXPos").style.borderColor = default_text_box_border_colour;
+            options_s_x_pos_element.style.borderColor = default_text_box_border_colour;
         }
 
         if (s_y_pos_has_error || center_has_error) {
-            document.getElementById("optionsStartYPos").style.borderColor = error_text_box_border_colour;
+            options_s_y_pos_element.style.borderColor = error_text_box_border_colour;
         }
         else {
-            document.getElementById("optionsStartYPos").style.borderColor = default_text_box_border_colour;
+            options_s_y_pos_element.style.borderColor = default_text_box_border_colour;
         }
 
         if (e_x_pos_has_error || center_has_error) {
-            document.getElementById("optionsEndXPos").style.borderColor = error_text_box_border_colour;
+            options_e_x_pos_element.style.borderColor = error_text_box_border_colour;
         }
         else {
-            document.getElementById("optionsEndXPos").style.borderColor = default_text_box_border_colour;
+            options_e_x_pos_element.style.borderColor = default_text_box_border_colour;
         }
 
         if (e_y_pos_has_error || center_has_error) {
-            document.getElementById("optionsEndYPos").style.borderColor = error_text_box_border_colour;
+            options_e_y_pos_element.style.borderColor = error_text_box_border_colour;
         }
         else {
-            document.getElementById("optionsEndYPos").style.borderColor = default_text_box_border_colour;
+            options_e_y_pos_element.style.borderColor = default_text_box_border_colour;
         }
 
         return false;
     }
 
-    function change_charge_polarity_image_in_options_modal () {
-        var polarity_div_image = document.getElementById("polarityDivPic");
-        polarity_div_image.alt = -polarity_div_image.alt;
-        if (polarity_div_image.alt == "-1") polarity_div_image.src = "images/negCharge.png";
-        else polarity_div_image.src = "images/posCharge.png";
+    function change_charge_polarity_image_in_point_charge_modal () {
+        polarity_div_image_point_charge_modal.alt = -polarity_div_image_point_charge_modal.alt;
+        if (polarity_div_image_point_charge_modal.alt == "-1") polarity_div_image_point_charge_modal.src = "images/negCharge.png";
+        else polarity_div_image_point_charge_modal.src = "images/posCharge.png";
+    }
+
+    function change_charge_polarity_image_in_line_charge_modal () {
+        polarity_div_image_line_charge_modal.alt = -polarity_div_image_line_charge_modal.alt;
+        if (polarity_div_image_line_charge_modal.alt == "-1") polarity_div_image_line_charge_modal.src = "images/negCharge.png";
+        else polarity_div_image_line_charge_modal.src = "images/posCharge.png";
     }
 
     function close_options_pop_up () {
-        var canvasContainer = document.getElementById("canvasContainer");
-        canvasContainer.removeChild(document.getElementById("fullScreenDiv"));
-        canvasContainer.removeChild(document.getElementById("popUp"));
+        fullscreen_div.style.display = "none";
+        $(".popUp").hide();
+        options_x_pos_element.style.borderColor = default_text_box_border_colour;
+        options_y_pos_element.style.borderColor = default_text_box_border_colour;
+        options_linear_charge_density_element.style.borderColor = default_text_box_border_colour;
+        options_length_per_point_element.style.borderColor = default_text_box_border_colour;
+        options_s_x_pos_element.style.borderColor = default_text_box_border_colour;
+        options_s_y_pos_element.style.borderColor = default_text_box_border_colour;
+        options_e_x_pos_element.style.borderColor = default_text_box_border_colour;
+        options_e_y_pos_element.style.borderColor = default_text_box_border_colour;
     }
 
     function create_new_element (type, id, className, text){
@@ -981,6 +876,7 @@ var UI = (function () {
 
             canvas_container = document.getElementById("canvasContainer");
             charge_list = document.getElementById ("chargeList");
+            fullscreen_div = document.getElementById("fullScreenDiv");
             probe_button = document.getElementById("probeButton");
             probe_magnitude = document.getElementById("probeMagnitude");
             probe_angle = document.getElementById("probeAngle");
@@ -1001,6 +897,18 @@ var UI = (function () {
             s_y_pos_element_for_strength_angle = document.getElementById("startYTextLengthAngle");
             add_line_charge_by_start_end_button = document.getElementById("addLineChargeStartEnd");
             add_line_charge_by_length_and_angle_button = document.getElementById("addLineChargeLengthAngle");
+            polarity_div_image_point_charge_modal = document.getElementById("polarityDivPicPointChargeModal");
+            options_delete_button_point_charge_modal = document.getElementById("optionsUpdateDeleteButtonPointCharge");
+            options_x_pos_element = document.getElementById("optionsXPOS");
+            options_y_pos_element = document.getElementById("optionsYPOS");
+            polarity_div_image_line_charge_modal = document.getElementById("polarityDivPicLineChargeModal");
+            options_delete_button_line_charge_modal = document.getElementById("optionsUpdateDeleteButtonLineCharge");
+            options_linear_charge_density_element = document.getElementById("optionsChargeDensity");
+            options_length_per_point_element = document.getElementById("optionsLengthPerPoint");
+            options_s_x_pos_element = document.getElementById("optionsStartXPos");
+            options_s_y_pos_element = document.getElementById("optionsStartYPos");
+            options_e_x_pos_element = document.getElementById("optionsEndXPos");
+            options_e_y_pos_element = document.getElementById("optionsEndYPos");
         },
 
         add_new_point_charge_to_list : add_new_point_charge_to_list,
@@ -1035,7 +943,9 @@ var UI = (function () {
 
         close_options_pop_up : close_options_pop_up,
 
-        change_charge_polarity_image_in_options_modal : change_charge_polarity_image_in_options_modal,
+        change_charge_polarity_image_in_point_charge_modal : change_charge_polarity_image_in_point_charge_modal,
+
+        change_charge_polarity_image_in_line_charge_modal : change_charge_polarity_image_in_line_charge_modal,
 
         update_probe_information_for_strength_and_angle : update_probe_information_for_strength_and_angle,
 
@@ -1406,11 +1316,7 @@ var CanvasField = (function () {
         current_charge_index = charge_array.length - 1;
         UI.add_new_point_charge_to_list(new_charge);
         UI.update_element_list_shading(current_charge_id, selected_charge_id);
-        if (charge_array.length == 1) {
-            canvas.onmouseup = mouse_up;
-            canvas.onmousedown = mouse_down;
-            canvas.onmousemove = mouse_moved;
-        }
+        if (charge_array.length == 1) enable_mouse_actions();
         selected_charge_id = current_charge_id;
         highest_active_id = current_charge_id;
         current_charge_id++;
@@ -1441,11 +1347,7 @@ var CanvasField = (function () {
         current_charge_index = charge_array.length - 1;
         UI.add_new_line_charge_to_list(new_charge);
         UI.update_element_list_shading(current_charge_id, selected_charge_id);
-        if (charge_array.length == 1) {
-            canvas.onmouseup = mouse_up;
-            canvas.onmousedown = mouse_down;
-            canvas.onmousemove = mouse_moved;
-        }
+        if (charge_array.length == 1) enable_mouse_actions();
         selected_charge_id = current_charge_id;
         highest_active_id = current_charge_id;
         current_charge_id++;
@@ -1644,10 +1546,7 @@ var CanvasField = (function () {
         var point_charge = charge_array[array_index];
         UI.open_point_charge_options_modal(point_charge);
 
-        canvas.onmouseup = null;
-        canvas.onmousedown = null;
-        canvas.onmousemove = null;
-        clearInterval(interval_id);
+        disable_mouse_actions_and_stop_drawing_interval();
     }
 
     function options_button_for_line_charge_clicked (id) {
@@ -1657,10 +1556,7 @@ var CanvasField = (function () {
         var line_charge = charge_array[array_index];
         UI.open_line_charge_options_modal(line_charge);
 
-        canvas.onmouseup = null;
-        canvas.onmousedown = null;
-        canvas.onmousemove = null;
-        clearInterval(interval_id);
+        disable_mouse_actions_and_stop_drawing_interval();
     }
 
     function update_point_charge () {
@@ -1669,9 +1565,7 @@ var CanvasField = (function () {
         if (!user_input) return;
         UI.close_options_pop_up();
 
-        canvas.onmouseup = mouse_up;
-        canvas.onmousedown = mouse_down;
-        canvas.onmousemove = mouse_moved;
+        enable_mouse_actions();
 
         re_draw();    
     }
@@ -1683,9 +1577,7 @@ var CanvasField = (function () {
         partition_line_charge(line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
         UI.close_options_pop_up();
 
-        canvas.onmouseup = mouse_up;
-        canvas.onmousedown = mouse_down;
-        canvas.onmousemove = mouse_moved;
+        enable_mouse_actions();
 
         re_draw();
     }
@@ -1697,10 +1589,7 @@ var CanvasField = (function () {
             UI.remove_from_charge_list(id);
             canvas.width = canvas.width;
 
-            canvas.onmouseup = null;
-            canvas.onmousedown = null;
-            canvas.onmousemove = null;
-            clearInterval(interval_id);
+            disable_mouse_actions_and_stop_drawing_interval();
         }
         else {
             if (id != highest_active_id) selected_charge_id = UI.higher_active_id(id);
@@ -1722,9 +1611,7 @@ var CanvasField = (function () {
 
             UI.remove_from_charge_list(id);
 
-            canvas.onmouseup = mouse_up;
-            canvas.onmousedown = mouse_down;
-            canvas.onmousemove = mouse_moved;
+            enable_mouse_actions();
         }
 
         UI.close_options_pop_up();
@@ -1733,6 +1620,19 @@ var CanvasField = (function () {
         // changed draw
         // mouse moved (probe)
         // cursor over circle
+    }
+
+    function enable_mouse_actions() {
+        canvas.onmouseup = mouse_up;
+        canvas.onmousedown = mouse_down;
+        canvas.onmousemove = mouse_moved;        
+    }
+
+    function disable_mouse_actions_and_stop_drawing_interval() {
+        canvas.onmouseup = null;
+        canvas.onmousedown = null;
+        canvas.onmousemove = null;
+        clearInterval(interval_id);        
     }
 
     function find_array_index_from_id (id) {
@@ -1758,9 +1658,7 @@ var CanvasField = (function () {
 
             re_draw();
 
-            canvas.onmouseup = mouse_up;
-            canvas.onmousedown = mouse_down;
-            canvas.onmousemove = mouse_moved;
+            enable_mouse_actions();
 
             UI.add_new_point_charge_to_list(charge_array[charge_array.length - 1]);
             select_charge_element(selected_charge_id, -1);
@@ -1784,6 +1682,8 @@ var CanvasField = (function () {
 
         options_button_for_line_charge_clicked : options_button_for_line_charge_clicked,
 
-        delete_charge_element : delete_charge_element
+        delete_charge_element : delete_charge_element,
+
+        enable_mouse_actions : enable_mouse_actions
     }
 })();
