@@ -197,7 +197,7 @@ var CanvasField = (function () {
         for (var i = 0; i < charge_array.length; i++){
             var current_element = charge_array[i];
             if (current_element.point_or_line == 1){
-                point_charge_gradient = ctx.createRadialGradient(current_element.x_pos,current_element.y_pos,5,current_element.x_pos,current_element.y_pos,15);
+                point_charge_gradient = ctx.createRadialGradient(current_element.x_pos,current_element.y_pos,5,current_element.x_pos,current_element.y_pos,point_charge_radius);
                 if(current_element.polarity == 1){
                     point_charge_gradient.addColorStop(0, 'rgba(0,0,0,1)');
                     point_charge_gradient.addColorStop(0.8, 'rgba(200,200,200,.9)');
@@ -792,7 +792,7 @@ var CanvasField = (function () {
             canvas = document.getElementById("canvas");
             ctx = canvas.getContext("2d");
 
-            point_charge_gradient = ctx.createRadialGradient(charge_array[current_charge_index].x_pos,charge_array[current_charge_index].y_pos,5,charge_array[current_charge_index].x_pos,charge_array[current_charge_index].y_pos,15);
+            point_charge_gradient = ctx.createRadialGradient(charge_array[current_charge_index].x_pos,charge_array[current_charge_index].y_pos,5,charge_array[current_charge_index].x_pos,charge_array[current_charge_index].y_pos,point_charge_radius);
             point_charge_gradient.addColorStop(0, 'rgba(0,0,0,1)');
             point_charge_gradient.addColorStop(0.8, 'rgba(200,200,200,.9)');
             point_charge_gradient.addColorStop(1, 'rgba(255,255,255,0)');
