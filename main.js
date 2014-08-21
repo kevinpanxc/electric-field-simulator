@@ -3,8 +3,8 @@
 
 function determine_center (first, second) {
     var center;
-    if (second > first) center = Math.round((second - first)/2) + first;
-    else center = Math.round((first - second)/2) + second;
+    if (second > first) center = Math.round((second - first)/2) + parseFloat(first);
+    else center = Math.round((first - second)/2) + parseFloat(second);
     return center;
 }
 
@@ -108,6 +108,36 @@ var UI = (function () {
     var default_text_box_border_colour;
     var error_text_box_border_colour = "#FF1414";
 
+    // main ui elements
+    var canvas_container;
+    var charge_list;
+
+    // probe ui elements
+    var probe_button;
+    var probe_magnitude;
+    var probe_angle;
+    var probe_x_element;
+    var probe_y_element;
+
+    // add point charge ui elements
+    var charge_strength_element;
+    var x_pos_element;
+    var y_pos_element;
+
+    // add line charge ui elements
+    var linear_charge_density_element;
+    var length_per_point_element;
+    var s_x_pos_element_for_start_end;
+    var s_y_pos_element_for_start_end;
+    var e_x_pos_element;
+    var e_y_pos_element;
+    var angle_element;
+    var length_element;
+    var s_x_pos_element_for_strength_angle;
+    var s_y_pos_element_for_strength_angle;
+    var add_line_charge_by_start_end_button;
+    var add_line_charge_by_length_and_angle_button;
+
     function build_coordinates_span(parent_span, x_span, y_span) {
         parent_span.innerHTML += "(";
         parent_span.appendChild(x_span);
@@ -118,7 +148,6 @@ var UI = (function () {
     }
 
     function add_new_point_charge_to_list (point_charge) {
-        var charge_list = document.getElementById ("chargeList");
         var list_element = document.createElement("li");
         var right_block = document.createElement("div");
         var text_element = document.createElement("div");
@@ -193,7 +222,6 @@ var UI = (function () {
     }
 
     function add_new_line_charge_to_list (line_charge) {
-        var charge_list = document.getElementById ("chargeList");
         var list_element = document.createElement("li");
         var right_block = document.createElement("div");
         var text_element = document.createElement("div");
@@ -283,7 +311,7 @@ var UI = (function () {
         angle_container_span.innerHTML = -(line_charge.angle).toFixed(3);
 
         // listElement.style.background = "#EAEAEA"; // COMMENT: setting the background in js overrides the background hover property in css? need to look into topic: "specificity"
-        chargeList.appendChild(list_element);
+        charge_list.appendChild(list_element);
         list_element.appendChild(color_code_element);
         list_element.appendChild(right_block);
         list_element.setAttribute("onClick", "CanvasField.select_charge_element(" + line_charge.id + ", -1)");
@@ -291,7 +319,7 @@ var UI = (function () {
         
         // stops the click action to propagating to the overall li element and cause currentSelectClick() to run
         $(expand_button).click(function(event) {event.stopPropagation()});
-        options_button.setAttribute("onClick", "optionsButtonLineChargeListClick(" +line_charge.id + ")");
+        options_button.setAttribute("onClick", "CanvasField.options_button_for_line_charge_clicked(" +line_charge.id + ")");
         // stops the click action to propagating to the overall li element and cause currentSelectClick() to run
         $(options_button).click(function(event) {event.stopPropagation()});
 
@@ -372,6 +400,16 @@ var UI = (function () {
         }
     }
 
+    function update_probe_information_for_strength_and_angle (strength, angle) {
+        probe_magnitude.innerHTML = "STRENGTH: " + strength;
+        probe_angle.innerHTML = "ANGLE: " + angle;
+    }
+
+    function update_probe_information_for_x_and_y (x, y) {
+        probe_x_element.value = x;
+        probe_y_element.value = y;        
+    }
+
     function update_element_list_shading (new_charge_id, previous_charge_id) {
         var previous_shaded_list_element = document.getElementById("li" + previous_charge_id);
 
@@ -380,14 +418,10 @@ var UI = (function () {
     }
 
     function get_input_to_add_point_charge (polarity) {
-        var input_strength = document.getElementById("strengthText");
-        var x_pos_element = document.getElementById("xPosText");
-        var y_pos_element = document.getElementById("yPosText");
-
-        var strength = Number(input_strength.value);
+        var strength = Number(charge_strength_element.value);
         var x_pos = Number(x_pos_element.value);
         var y_pos = Number(y_pos_element.value);
-        if (input_strength.value == "") strength = 1;
+        if (charge_strength_element.value == "") strength = 1;
         else if(isNaN(strength) || strength == 0) return false;
         else if (strength < 0) {
             strength = -strength;
@@ -409,8 +443,8 @@ var UI = (function () {
     }
 
     function get_input_to_add_line_charge (polarity) {
-        var by_start_end_points = !document.getElementById("addLineChargeStartEnd").disabled;
-        var by_angle_and_length = !document.getElementById("addLineChargeLengthAngle").disabled;
+        var by_start_end_points = !add_line_charge_by_start_end_button.disabled;
+        var by_angle_and_length = !add_line_charge_by_length_and_angle_button.disabled;
 
         var linear_charge_density, s_x_pos, s_y_pos, e_x_pos, e_y_pos, length_per_point;
 
@@ -425,12 +459,12 @@ var UI = (function () {
         }
         else if (by_start_end_points){
             if (!validate_add_line_charge_form("start_end_points")) return false;
-            linear_charge_density = document.getElementById("chargeDensityText").value;
-            length_per_point = document.getElementById("lengthPerPointText").value;
-            s_x_pos = document.getElementById("startXTextStartEnd").value;
-            s_y_pos = document.getElementById("startYTextStartEnd").value;
-            e_x_pos = document.getElementById("endXText").value;
-            e_y_pos = document.getElementById("endYText").value;
+            linear_charge_density = linear_charge_density_element.value;
+            length_per_point = length_per_point_element.value;
+            s_x_pos = s_x_pos_element_for_start_end.value;
+            s_y_pos = s_y_pos_element_for_start_end.value;
+            e_x_pos = e_x_pos_element.value;
+            e_y_pos = e_y_pos_element.value;
 
             s_x_pos = parseFloat(s_x_pos);
             s_y_pos = parseFloat(s_y_pos);
@@ -439,12 +473,12 @@ var UI = (function () {
         }
         else {
             if (!validate_add_line_charge_form("angle_and_length")) return false;
-            linear_charge_density = document.getElementById("chargeDensityText").value;
-            length_per_point = document.getElementById("lengthPerPointText").value;
-            angle = document.getElementById("angleText").value;
-            length = document.getElementById("lengthText").value;
-            s_x_pos = document.getElementById("startXTextLengthAngle").value;
-            s_y_pos = document.getElementById("startYTextLengthAngle").value;
+            linear_charge_density = linear_charge_density_element.value;
+            length_per_point = length_per_point_element.value;
+            angle = angle_element.value;
+            length = length_element.value;
+            s_x_pos = s_x_pos_element_for_strength_angle.value;
+            s_y_pos = s_y_pos_element_for_strength_angle.value;
 
             s_x_pos = parseFloat(s_x_pos);
             s_y_pos = parseFloat(s_y_pos);
@@ -463,49 +497,36 @@ var UI = (function () {
     }
 
     function validate_add_line_charge_form (method) {
-        var linear_charge_density = document.getElementById("chargeDensityText");
-        var length_per_point = document.getElementById("lengthPerPointText");
-
-        if (isNaN(linear_charge_density.value) || isNaN(length_per_point.value)){
+        if (isNaN(linear_charge_density_element.value) || isNaN(length_per_point_element.value)){
             return false;
         }
-        else if (linear_charge_density.value <= 0 || length_per_point.value < 1) {
+        else if (linear_charge_density_element.value <= 0 || length_per_point_element.value < 1) {
             return false;
         }
 
         if (method == "start_end_points") {
-            var s_x_pos = document.getElementById("startXTextStartEnd");
-            var s_y_pos = document.getElementById("startYTextStartEnd");
-            var e_x_pos = document.getElementById("endXText");
-            var e_y_pos = document.getElementById("endYText");
-
-            if (isNaN(s_x_pos.value) || isNaN(s_y_pos.value) || isNaN(e_x_pos.value) || isNaN(e_y_pos.value)){
+            if (isNaN(s_x_pos_element_for_start_end.value) || isNaN(s_y_pos_element_for_start_end.value) || isNaN(e_x_pos_element.value) || isNaN(e_y_pos_element.value)){
                 return false;
             }
-            else if (s_x_pos.value < 0 || s_y_pos.value < 0 || e_x_pos.value < 0 || e_y_pos.value < 0) {
+            else if (s_x_pos_element_for_start_end.value < 0 || s_y_pos_element_for_start_end.value < 0 || e_x_pos_element.value < 0 || e_y_pos_element.value < 0) {
                 return false;
             }
-            else if (s_x_pos.value > 600 || s_y_pos.value > 600 || e_x_pos.value > 600 || e_y_pos.value > 600) {
+            else if (s_x_pos_element_for_start_end.value > 600 || s_y_pos_element_for_start_end.value > 600 || e_x_pos_element.value > 600 || e_y_pos_element.value > 600) {
                 return false;
             }
-            else if ((s_x_pos.value + s_y_pos.value + e_x_pos.value + e_y_pos.value) == 0) {
+            else if ((s_x_pos_element_for_start_end.value + s_y_pos_element_for_start_end.value + e_x_pos_element.value + e_y_pos_element.value) == 0) {
                 return false;
             }
             else return true;
         }
         else if (method == "angle_and_length") {
-            var angle = document.getElementById("angleText");
-            var length = document.getElementById("lengthText");
-            var s_x_pos = document.getElementById("startXTextLengthAngle");
-            var s_y_pos = document.getElementById("startYTextLengthAngle");
-
-            if (isNaN(angle.value) || isNaN(length.value) || isNaN(s_x_pos.value) || isNaN(s_y_pos.value)){
+            if (isNaN(angle_element.value) || isNaN(length_element.value) || isNaN(s_x_pos_element_for_strength_angle.value) || isNaN(s_y_pos_element_for_strength_angle.value)){
                 return false;
             }
-            else if (length.value <= 0 || s_x_pos.value < 0 || s_y_pos.value < 0){
+            else if (length_element.value <= 0 || s_x_pos_element_for_strength_angle.value < 0 || s_y_pos_element_for_strength_angle.value < 0){
                 return false;
             }
-            else if (s_x_pos.value > 600 || s_y_pos.value > 600) {
+            else if (s_x_pos_element_for_strength_angle.value > 600 || s_y_pos_element_for_strength_angle.value > 600) {
                 return false;
             }
             else return true;
@@ -515,17 +536,11 @@ var UI = (function () {
     }
 
     function show_probe_container () {
-        var probe_button = document.getElementById("probeButton");
-
         $(".probeInfoContainer").show();
         probe_button.style.backgroundPosition="65px 70px";
     }
 
     function hide_probe_container () {
-        var probe_magnitude = document.getElementById("probeMagnitude");
-        var probe_angle = document.getElementById("probeAngle");
-        var probe_button = document.getElementById("probeButton");
-
         $(".probeInfoContainer").hide();
         probe_magnitude.innerHTML = "";
         probe_angle.innerHTML = "";
@@ -533,9 +548,6 @@ var UI = (function () {
     }
 
     function get_input_to_probe_field () {
-        var probe_x_element = document.getElementById("probeXText");
-        var probe_y_element = document.getElementById("probeYText");
-
         if (!isNaN(probe_x_element.value) && !isNaN(probe_y_element.value) && probe_y_element.value != "" && probe_x_element.Value != ""){
             if (probe_y_element.value >= 0 && probe_y_element.value <= canvas.height && probe_x_element.value >= 0 && probe_x_element.value <= canvas.width) {
                 return {
@@ -548,7 +560,6 @@ var UI = (function () {
     }
 
     function open_point_charge_options_modal (point_charge) {
-        var canvas_container = document.getElementById("canvasContainer");
         var options_pop_up = create_new_element("div", "popUp", "optionsPointChargePopUp fullScreenDivFade", "");
         var options_heading_pop_up = create_new_element("div", "", "optionsHeadingPopUp fullScreenDivFade", "OPTIONS");
         var cross_image = create_new_element("div", "", "crossImage", "");
@@ -613,7 +624,7 @@ var UI = (function () {
         cross_image.setAttribute("onClick", "UI.close_options_pop_up()");
         polarity_div_image.setAttribute("onClick", "UI.change_charge_polarity_image_in_options_modal()");
         options_update_button.setAttribute("onClick", "CanvasField.update_point_charge()");
-        options_delete_button.setAttribute("onClick", "deleteCharge("+ point_charge.id +")");
+        options_delete_button.setAttribute("onClick", "CanvasField.delete_charge_element("+ point_charge.id +")");
 
         // $("#fullScreenDiv").hover(
         //  function () {
@@ -625,6 +636,121 @@ var UI = (function () {
         // );
 
         default_text_box_border_colour = document.getElementById("optionsXPOS").style.borderColor;
+    }
+
+    function open_line_charge_options_modal (line_charge) {
+        var options_pop_up = create_new_element("div", "popUp", "optionsLineChargePopUp fullScreenDivFade", "");
+        var options_heading_pop_up = create_new_element("div", "", "optionsHeadingPopUp fullScreenDivFade", "OPTIONS");
+        var cross_image = create_new_element("div", "", "crossImage", "");
+        var options_left_container = create_new_element("div", "", "optionsLineChargeLeftContainer", "");
+        var options_right_container = create_new_element("div", "", "optionsLineChargeRightContainer", "");
+        var options_bottom_container = create_new_element("div", "", "optionsBottomContainer", "");
+        var options_update_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Update");
+        var options_delete_button = create_new_element("div", "", "optionsUpdateDeleteButton", "Delete");
+        var fullscreen_div = create_new_element("div", "fullScreenDiv", "fullScreenDiv fullScreenDivFade", "");
+
+        var otc_left_1 = create_new_element("div", "", "optionsTextContainer", "CHARGE DENSITY: ");
+        var otc_left_2 = create_new_element("div", "", "optionsTextContainer", "LENGTH PER CHARGE: ");
+        var otc_left_3 = create_new_element("div", "", "optionsTextContainer", "START X: ");
+        var otc_left_4 = create_new_element("div", "", "optionsTextContainer", "START Y: ");
+        var otc_left_5 = create_new_element("div", "", "optionsTextContainer", "END X: ");
+        var otc_left_6 = create_new_element("div", "", "optionsTextContainer", "END Y: ");
+        var otc_left_7 = create_new_element("div", "", "optionsTextContainer", "POLARITY: ");
+
+        var otc_right_1 = create_new_element("div", "", "optionsTextContainer", "");
+        var otc_right_2 = create_new_element("div", "", "optionsTextContainer", "");
+        var otc_right_3 = create_new_element("div", "", "optionsTextContainer", "");
+        var otc_right_4 = create_new_element("div", "", "optionsTextContainer", "");
+        var otc_right_5 = create_new_element("div", "", "optionsTextContainer", "");
+        var otc_right_6 = create_new_element("div", "", "optionsTextContainer", "");
+
+        var input_1 = create_new_element("input", "optionsChargeDensity", "", "");
+        var input_2 = create_new_element("input", "optionsLengthPerPoint", "", "");
+        var input_3 = create_new_element("input", "optionsStartXPos", "", "");
+        var input_4 = create_new_element("input", "optionsStartYPos", "", "");
+        var input_5 = create_new_element("input", "optionsEndXPos", "", "");
+        var input_6 = create_new_element("input", "optionsEndYPos", "", "");
+
+        input_1.type = "text";
+        input_2.type = "text";
+        input_3.type = "text";
+        input_4.type = "text";
+        input_5.type = "text";
+        input_6.type = "text";
+
+        input_1.size = 6;
+        input_2.size = 6;
+        input_3.size = 6;
+        input_4.size = 6;
+        input_5.size = 6;
+        input_6.size = 6;
+
+        var polarity_div = document.createElement("div");
+        var polarity_div_image = create_new_element("img", "polarityDivPic", "optionsPosNegSel", "");
+
+        if (line_charge.polarity == 1) {
+            polarity_div_image.src = "images/posCharge.png";
+            polarity_div_image.alt = "1";
+        }
+        else {
+            polarity_div_image.src = "images/negCharge.png";
+            polarity_div_image.alt = "-1";
+        }
+
+        input_1.value = line_charge.linear_charge_density;
+        input_2.value = line_charge.length_per_point;
+        input_3.value = line_charge.s_x_pos;
+        input_4.value = line_charge.s_y_pos;
+        input_5.value = line_charge.e_x_pos;
+        input_6.value = line_charge.e_y_pos;
+     
+        canvas_container.appendChild(fullscreen_div);
+        canvas_container.appendChild(options_pop_up);
+        options_pop_up.appendChild(options_heading_pop_up);
+        options_heading_pop_up.appendChild(cross_image);
+        options_pop_up.appendChild(options_left_container);
+        options_pop_up.appendChild(options_right_container);
+        options_pop_up.appendChild(options_bottom_container);
+        options_left_container.appendChild(otc_left_1);
+        options_left_container.appendChild(otc_left_2);
+        options_left_container.appendChild(otc_left_3);
+        options_left_container.appendChild(otc_left_4);
+        options_left_container.appendChild(otc_left_5);
+        options_left_container.appendChild(otc_left_6);
+        options_left_container.appendChild(otc_left_7);
+        options_right_container.appendChild(otc_right_1);
+        options_right_container.appendChild(otc_right_2);
+        options_right_container.appendChild(otc_right_3);
+        options_right_container.appendChild(otc_right_4);
+        options_right_container.appendChild(otc_right_5);
+        options_right_container.appendChild(otc_right_6);
+        otc_right_1.appendChild(input_1);
+        otc_right_2.appendChild(input_2);
+        otc_right_3.appendChild(input_3);
+        otc_right_4.appendChild(input_4);
+        otc_right_5.appendChild(input_5);
+        otc_right_6.appendChild(input_6);
+        options_right_container.appendChild(polarity_div);
+        polarity_div.appendChild(polarity_div_image);
+        options_bottom_container.appendChild(options_update_button);
+        options_bottom_container.appendChild(options_delete_button);
+
+        fullscreen_div.setAttribute("onClick", "UI.close_options_pop_up()");
+        cross_image.setAttribute("onClick", "UI.close_options_pop_up()");
+        polarity_div_image.setAttribute("onClick", "UI.change_charge_polarity_image_in_options_modal()");
+        options_update_button.setAttribute("onClick", "CanvasField.update_line_charge()");
+        options_delete_button.setAttribute("onClick", "CanvasField.delete_charge_element("+ line_charge.id +")");
+
+        // $("#fullScreenDiv").hover(
+        //  function () {
+        //      $(".fullScreenDivFade").fadeTo(500, 0.3);
+        //  },
+        //  function () {
+        //      $(".fullScreenDivFade").fadeTo(500, 1.0);
+        //  }
+        // );
+
+        default_text_box_border_colour = document.getElementById("optionsChargeDensity").style.borderColor;   
     }
 
     function get_input_to_update_point_charge (point_charge) {
@@ -725,7 +851,7 @@ var UI = (function () {
             if (!center_has_error) {
                 line_charge.linear_charge_density = parseFloat(charge_density);
 
-                if (line_charge.length_per_point != parseFloat(length_per_point)) line_charge.point_charge_array.length = 0;
+                line_charge.point_charge_array.length = 0;
 
                 line_charge.length_per_point = parseFloat(length_per_point);
                 line_charge.s_x_pos = parseFloat(s_x_pos);
@@ -734,27 +860,27 @@ var UI = (function () {
                 line_charge.e_y_pos = parseFloat(e_y_pos);
                 line_charge.c_x_pos = parseFloat(new_c_x_pos);
                 line_charge.c_y_pos = parseFloat(new_c_y_pos);
-                line_charge.length = findLength (line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
-                line_charge.angle = findAngle (line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
+                line_charge.length = find_length (line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
+                line_charge.angle = find_angle (line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
                 line_charge.polarity = polarity;
 
-                document.getElementById("length" + id).innerHTML = line_charge.length.toFixed(4);
-                document.getElementById("lengthPerPoint" + id).innerHTML = length_per_point;
-                document.getElementById("startCoordsX" + id).innerHTML = s_x_pos;
-                document.getElementById("startCoordsY" + id).innerHTML = s_y_pos;
-                document.getElementById("endCoordsX" + id).innerHTML = e_x_pos;
-                document.getElementById("endCoordsY" + id).innerHTML = e_y_pos;
+                document.getElementById("length" + line_charge.id).innerHTML = line_charge.length.toFixed(4);
+                document.getElementById("lengthPerPoint" + line_charge.id).innerHTML = length_per_point;
+                document.getElementById("startCoordsX" + line_charge.id).innerHTML = s_x_pos;
+                document.getElementById("startCoordsY" + line_charge.id).innerHTML = s_y_pos;
+                document.getElementById("endCoordsX" + line_charge.id).innerHTML = e_x_pos;
+                document.getElementById("endCoordsY" + line_charge.id).innerHTML = e_y_pos;
 
                 if (polarity == "1") {
-                    document.getElementById("lcChargeDensity" + id).innerHTML = line_charge.linear_charge_density +" C/unit </br>Line Charge</br>";
-                    document.getElementById("colorCodeBar" + id).src = "images/posChargeColorCode.png";
+                    document.getElementById("lcChargeDensity" + line_charge.id).innerHTML = line_charge.linear_charge_density +" C/unit </br>Line Charge</br>";
+                    document.getElementById("colorCodeBar" + line_charge.id).src = "images/posChargeColorCode.png";
                 }
                 else {
-                    document.getElementById("lcChargeDensity" + id).innerHTML = "-" + line_charge.linear_charge_density +" C/unit </br>Line Charge </br>";
-                    document.getElementById("colorCodeBar" + id).src = "images/negChargeColorCode.png";
+                    document.getElementById("lcChargeDensity" + line_charge.id).innerHTML = "-" + line_charge.linear_charge_density +" C/unit </br>Line Charge </br>";
+                    document.getElementById("colorCodeBar" + line_charge.id).src = "images/negChargeColorCode.png";
                 }
 
-                return;
+                return true;
             }
         }
 
@@ -799,6 +925,8 @@ var UI = (function () {
         else {
             document.getElementById("optionsEndYPos").style.borderColor = default_text_box_border_colour;
         }
+
+        return false;
     }
 
     function change_charge_polarity_image_in_options_modal () {
@@ -822,20 +950,70 @@ var UI = (function () {
         return temp;
     }
 
+    function change_cursor_to_pointer () {
+        document.body.style.cursor = 'pointer';
+    }
+
+    function change_cursor_to_default () {
+        document.body.style.cursor = 'default';
+    }
+
+    function remove_from_charge_list (id) {
+        var list_element_to_delete = document.getElementById("li" + id);
+        charge_list.removeChild(list_element_to_delete);
+    }
+
+    function higher_active_id(id){
+        var next_element_full_id = $("#li" + id).next().attr("id");
+        var next_element_number_id = next_element_full_id.substr(2);
+        return Number(next_element_number_id);
+    }
+
+    function lower_active_id(id){
+        var next_element_full_id = $("#li" + id).prev().attr("id");
+        var next_element_number_id = next_element_full_id.substr(2);
+        return Number(next_element_number_id);
+    }
+
     return {
         initialize : function () {
             $(".probeInfoContainer").hide();
+
+            canvas_container = document.getElementById("canvasContainer");
+            charge_list = document.getElementById ("chargeList");
+            probe_button = document.getElementById("probeButton");
+            probe_magnitude = document.getElementById("probeMagnitude");
+            probe_angle = document.getElementById("probeAngle");
+            probe_x_element = document.getElementById("probeXText");
+            probe_y_element = document.getElementById("probeYText");
+            charge_strength_element = document.getElementById("strengthText");
+            x_pos_element = document.getElementById("xPosText");
+            y_pos_element = document.getElementById("yPosText");
+            linear_charge_density_element = document.getElementById("chargeDensityText");
+            length_per_point_element = document.getElementById("lengthPerPointText");
+            s_x_pos_element_for_start_end = document.getElementById("startXTextStartEnd");
+            s_y_pos_element_for_start_end = document.getElementById("startYTextStartEnd");
+            e_x_pos_element = document.getElementById("endXText");
+            e_y_pos_element = document.getElementById("endYText");
+            angle_element = document.getElementById("angleText");
+            length_element = document.getElementById("lengthText");
+            s_x_pos_element_for_strength_angle = document.getElementById("startXTextLengthAngle");
+            s_y_pos_element_for_strength_angle = document.getElementById("startYTextLengthAngle");
+            add_line_charge_by_start_end_button = document.getElementById("addLineChargeStartEnd");
+            add_line_charge_by_length_and_angle_button = document.getElementById("addLineChargeLengthAngle");
         },
 
         add_new_point_charge_to_list : add_new_point_charge_to_list,
 
         add_new_line_charge_to_list : add_new_line_charge_to_list,
 
-        get_input_to_add_line_charge : get_input_to_add_line_charge,
-
         get_input_to_add_point_charge : get_input_to_add_point_charge,
 
+        get_input_to_add_line_charge : get_input_to_add_line_charge,
+
         get_input_to_update_point_charge : get_input_to_update_point_charge,
+
+        get_input_to_update_line_charge : get_input_to_update_line_charge,
 
         update_element_list_shading : update_element_list_shading,
 
@@ -853,9 +1031,25 @@ var UI = (function () {
 
         open_point_charge_options_modal : open_point_charge_options_modal,
 
+        open_line_charge_options_modal : open_line_charge_options_modal,
+
         close_options_pop_up : close_options_pop_up,
 
-        change_charge_polarity_image_in_options_modal : change_charge_polarity_image_in_options_modal
+        change_charge_polarity_image_in_options_modal : change_charge_polarity_image_in_options_modal,
+
+        update_probe_information_for_strength_and_angle : update_probe_information_for_strength_and_angle,
+
+        update_probe_information_for_x_and_y : update_probe_information_for_x_and_y,
+
+        change_cursor_to_pointer : change_cursor_to_pointer,
+
+        change_cursor_to_default : change_cursor_to_default,
+
+        remove_from_charge_list : remove_from_charge_list,
+
+        higher_active_id : higher_active_id,
+
+        lower_active_id : lower_active_id
     }
 })();
 
@@ -1093,7 +1287,7 @@ var CanvasField = (function () {
 
     function mouse_moved(e){
         if (is_mouse_down) {
-            document.body.style.cursor = 'pointer';
+            UI.change_cursor_to_pointer();
             var new_x_position = (e.pageX - canvas.offsetLeft) - cursor_x;
             var new_y_position = (e.pageY - canvas.offsetTop) - cursor_y;
             var current_element = charge_array[current_charge_index];
@@ -1130,23 +1324,18 @@ var CanvasField = (function () {
             }
         }
         else {
-            if ( mouse_check_and_return_index(e.pageX, e.pageY) >= 0 ) document.body.style.cursor = 'pointer';
-            else document.body.style.cursor = 'default';
+            if ( mouse_check_and_return_index(e.pageX, e.pageY) >= 0 ) UI.change_cursor_to_pointer();
+            else UI.change_cursor_to_default();
         }
-        var probe_magnitude = document.getElementById("probeMagnitude");
-        var probe_angle = document.getElementById("probeAngle");
         if (probe_mode == 1 && is_mouse_down == false){
             var x_probe = e.pageX - canvas.offsetLeft;
             var y_probe = e.pageY - canvas.offsetTop;
             var probe_result = probe_location(x_probe, y_probe);
-            probe_magnitude.innerHTML = "STRENGTH: " + probe_result["strength"].toFixed(3);
-            probe_angle.innerHTML = "ANGLE: " + probe_result["angle"].toFixed(3);
-            probe_x_element.value = x_probe;
-            probe_y_element.value = y_probe;
+            UI.update_probe_information_for_strength_and_angle(probe_result["strength"].toFixed(3), probe_result["angle"].toFixed(3));
+            UI.update_probe_information_for_x_and_y(x_probe, y_probe);
         }
         else if (probe_mode == 1 && is_mouse_down) {
-            probe_magnitude.innerHTML = "STRENGTH: ";
-            probe_angle.innerHTML = "ANGLE: ";
+            UI.update_probe_information_for_strength_and_angle("", "");
         }
     }
 
@@ -1371,11 +1560,8 @@ var CanvasField = (function () {
             var user_input = UI.get_input_to_probe_field();
             if (!user_input) return;
             else { 
-                var probe_magnitude = document.getElementById("probeMagnitude");
-                var probe_angle = document.getElementById("probeAngle");
                 var probe_result = probe_location(user_input["x"], user_input["y"]);
-                probe_magnitude.innerHTML = "STRENGTH: " + probe_result["strength"].toFixed(3);
-                probe_angle.innerHTML = "ANGLE: " + probe_result["angle"].toFixed(3);
+                UI.update_probe_information_for_strength_and_angle(probe_result["strength"].toFixed(3), probe_result["angle"].toFixed(3));
             }
         }
         else UI.hide_probe_container();
@@ -1464,21 +1650,89 @@ var CanvasField = (function () {
         clearInterval(interval_id);
     }
 
+    function options_button_for_line_charge_clicked (id) {
+        select_charge_element(id, -1);
+
+        var array_index = find_array_index_from_id(id);
+        var line_charge = charge_array[array_index];
+        UI.open_line_charge_options_modal(line_charge);
+
+        canvas.onmouseup = null;
+        canvas.onmousedown = null;
+        canvas.onmousemove = null;
+        clearInterval(interval_id);
+    }
+
     function update_point_charge () {
         var point_charge = charge_array[charge_array.length - 1];
         var user_input = UI.get_input_to_update_point_charge(point_charge);
         if (!user_input) return;
         UI.close_options_pop_up();
+
+        canvas.onmouseup = mouse_up;
+        canvas.onmousedown = mouse_down;
+        canvas.onmousemove = mouse_moved;
+
         re_draw();    
     }
 
     function update_line_charge () {
         var line_charge = charge_array[charge_array.length - 1];
-        var user_input = UI.get_input_to_update_point_charge(line_charge);
+        var user_input = UI.get_input_to_update_line_charge(line_charge);
         if (!user_input) return;
         partition_line_charge(line_charge.s_x_pos, line_charge.e_x_pos, line_charge.s_y_pos, line_charge.e_y_pos);
         UI.close_options_pop_up();
+
+        canvas.onmouseup = mouse_up;
+        canvas.onmousedown = mouse_down;
+        canvas.onmousemove = mouse_moved;
+
         re_draw();
+    }
+
+    function delete_charge_element (id) {
+        charge_array.pop();
+
+        if (charge_array.length == 0){
+            UI.remove_from_charge_list(id);
+            canvas.width = canvas.width;
+
+            canvas.onmouseup = null;
+            canvas.onmousedown = null;
+            canvas.onmousemove = null;
+            clearInterval(interval_id);
+        }
+        else {
+            if (id != highest_active_id) selected_charge_id = UI.higher_active_id(id);
+            else {
+                selected_charge_id = UI.lower_active_id(id);
+                highest_active_id = selected_charge_id;
+            }
+            select_charge_element(selected_charge_id, -1);
+
+            // if (highest_active_id == id) highest_active_id -= 1;
+
+            // var testString = "";
+            // for (var i = 0; i < charge_array.length; i++) {
+            //  testString += charge_array[i].id;
+            //  testString += ", ";
+            // }
+            // alert(testString);
+            // alert("Highest ID: " + highest_active_id);
+
+            UI.remove_from_charge_list(id);
+
+            canvas.onmouseup = mouse_up;
+            canvas.onmousedown = mouse_down;
+            canvas.onmousemove = mouse_moved;
+        }
+
+        UI.close_options_pop_up();
+
+        // when no elements in charge_array -> functions to deal with
+        // changed draw
+        // mouse moved (probe)
+        // cursor over circle
     }
 
     function find_array_index_from_id (id) {
@@ -1526,6 +1780,10 @@ var CanvasField = (function () {
 
         toggle_probe_mode_and_probe_location : toggle_probe_mode_and_probe_location,
 
-        options_button_for_point_charge_clicked : options_button_for_point_charge_clicked
+        options_button_for_point_charge_clicked : options_button_for_point_charge_clicked,
+
+        options_button_for_line_charge_clicked : options_button_for_line_charge_clicked,
+
+        delete_charge_element : delete_charge_element
     }
 })();
